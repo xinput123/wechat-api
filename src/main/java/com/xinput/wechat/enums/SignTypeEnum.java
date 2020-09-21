@@ -16,7 +16,7 @@ public enum SignTypeEnum {
     /**
      * HMAC-SHA256签名
      */
-    HMAC("HMAC-SHA256");
+    HMACSHA256("HMAC-SHA256");
 
     private String type;
 
@@ -48,13 +48,13 @@ public enum SignTypeEnum {
      * @param signType
      * @return
      */
-    public static String getAllowSign(String signType) {
+    public static SignTypeEnum getAllowSign(String signType) {
         SignTypeEnum signTypeEnum = getSignType(signType);
         if (signType == null) {
-            return MD5.getType();
+            return MD5;
         }
 
-        return signTypeEnum.getType();
+        return signTypeEnum;
     }
 
 }

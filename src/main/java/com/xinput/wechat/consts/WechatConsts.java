@@ -40,4 +40,9 @@ public class WechatConsts {
      * 证书存放地址
      */
     public static final String WECHAT_API_CERT_PATH = "wechat.api.cert.path";
+
+    /**
+     * 是否使用沙箱环境
+     */
+    public static final String WECHAT_USE_SANDBOX = "wechat.use.sandbox";
 }
