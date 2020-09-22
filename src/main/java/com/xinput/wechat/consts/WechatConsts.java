@@ -42,6 +42,11 @@ public class WechatConsts {
     public static final String WECHAT_API_CERT_PATH = "wechat.api.cert.path";
 
     /**
+     * 通知回调地址
+     */
+    public static final String WECHAT_NOTIFY_URL = "wechat.notify.url";
+
+    /**
      * 是否使用沙箱环境
      */
     public static final String WECHAT_USE_SANDBOX = "wechat.use.sandbox";

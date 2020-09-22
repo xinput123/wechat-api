@@ -1,6 +1,7 @@
 package com.xinput.wechat.enums;
 
 import com.xinput.bleach.util.StringUtils;
+import com.xinput.wechat.config.WechatConfig;
 
 /**
  * @author <a href="mailto:xinput.xx@gmail.com">xinput</a>
@@ -50,7 +51,7 @@ public enum SignTypeEnum {
      */
     public static SignTypeEnum getAllowSign(String signType) {
         SignTypeEnum signTypeEnum = getSignType(signType);
-        if (signType == null) {
+        if (signType == null || WechatConfig.getUseSandbox()) {
             return MD5;
         }
 

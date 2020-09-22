@@ -3,6 +3,7 @@ package com.xinput.wechat.util;
 import com.xinput.bleach.util.JsonUtils;
 import com.xinput.bleach.util.StringUtils;
 import com.xinput.bleach.util.XmlUtils;
+import com.xinput.bleach.util.bean.BeanMapUtils;
 import com.xinput.wechat.config.WechatConfig;
 import com.xinput.wechat.enums.SignTypeEnum;
 import com.xinput.wechat.exception.WechatException;
@@ -39,8 +40,8 @@ public final class WechatHttpUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(WechatHttpUtils.class);
 
-    public static String post(String url, BaseWeChatPayReq baseReq) {
-        return execute(url, baseReq, false);
+    public static String withoutCertQequest(String url, BaseWeChatPayReq baseReq) throws Exception {
+        return post(url, baseReq, false);
     }
 
     /**
@@ -50,13 +51,14 @@ public final class WechatHttpUtils {
      * @param baseReq 接口请求参数
      * @return
      */
-    public static String useCertPost(String url, BaseWeChatPayReq baseReq) {
-        return execute(url, baseReq, true);
+    public static String withCertPost(String url, BaseWeChatPayReq baseReq) throws Exception {
+        return post(url, baseReq, true);
     }
 
-    public static String execute(String url, BaseWeChatPayReq baseReq, boolean useCert) {
+    public static String post(String url, BaseWeChatPayReq baseReq, boolean useCert) throws Exception {
         // 设置有效的验证方式
-        baseReq.setSign_type(SignTypeEnum.getAllowSign(baseReq.getSign_type()));
+        SignTypeEnum signTypeEnum = SignTypeEnum.getAllowSign(baseReq.getSign_type());
+        baseReq.setSign_type(signTypeEnum.getType());
         logger.info("request url:[{}]. params:[{}]", url, JsonUtils.toJsonString(baseReq));
         baseReq.setAppid(WechatConfig.getWechatAppid());
         baseReq.setMch_id(WechatConfig.getWechatMchId());
@@ -65,19 +67,12 @@ public final class WechatHttpUtils {
         }
 
         // MD5运算生成签名，这里是第一次签名，用于调用统一下单接口
-        String sign = "";
-        if (SignTypeEnum.MD5.getType().equals(baseReq.getSign_type())) {
-            // md5签名
-            sign = WechatPayUtils.md5Sign(baseReq, WechatConfig.getWechatApiKey());
-        } else {
-            // HMAC-SHA256签名
-        }
-        baseReq.setSign(sign);
+        baseReq.setSign(WechatPayUtils.generateSignature(BeanMapUtils.toMap(baseReq), signTypeEnum));
 
         return execute(url, XmlUtils.toXml(baseReq), useCert);
     }
 
-    private static String execute(String url, String data, boolean useCert) {
+    public static String execute(String url, String data, boolean useCert) throws Exception {
         String certPath = null;
         String certPass = null;
         if (useCert) {
@@ -94,7 +89,7 @@ public final class WechatHttpUtils {
         return execute(url, data, useCert, certPath, certPass);
     }
 
-    private static String execute(String url, String data, boolean useCert, String certPath, String certPass) {
+    public static String execute(String url, String data, boolean useCert, String certPath, String certPass) throws Exception {
         return execute(url, data, useCert, certPath, certPass, null);
     }
 
@@ -107,7 +102,7 @@ public final class WechatHttpUtils {
      * @param certPass 证书密码,就是对应的商户号
      * @return {@link String} 请求返回的结果
      */
-    private static String execute(String url, String data, boolean useCert, String certPath, String certPass, InputStream certFile) throws WechatException {
+    private static String execute(String url, String data, boolean useCert, String certPath, String certPass, InputStream certFile) throws Exception {
         BasicHttpClientConnectionManager connManager = createConnManager(useCert, certPath, certPass, certFile);
         CloseableHttpClient httpClient = HttpClientBuilder.create()
                 .setConnectionManager(connManager)
@@ -123,6 +118,9 @@ public final class WechatHttpUtils {
         httpPost.setEntity(new StringEntity(data, "UTF-8"));
         String result;
         try {
+            if (WechatConfig.getUseSandbox()) {
+                logger.info("sandbox url:[{}]. request data : [{}].", url, data);
+            }
             HttpResponse httpResponse = httpClient.execute(httpPost);
             logger.info("request url:[{}], response code: [{}].", url, httpResponse.getStatusLine().getStatusCode());
             HttpEntity httpEntity = httpResponse.getEntity();
@@ -130,12 +128,12 @@ public final class WechatHttpUtils {
             logger.info("request url:[{}], response result:[{}].", url, result);
         } catch (Exception e) {
             logger.error("request url:[{}] exception.", url, e);
-            throw new WechatException("network error. url: " + url, e);
+            throw e;
         }
         return result;
     }
 
-    private static final BasicHttpClientConnectionManager createConnManager(boolean useCert, String certPath, String certPass, InputStream certFile) throws WechatException {
+    private static final BasicHttpClientConnectionManager createConnManager(boolean useCert, String certPath, String certPass, InputStream certFile) throws Exception {
         BasicHttpClientConnectionManager connManager;
         try {
             if (useCert) {
@@ -182,7 +180,7 @@ public final class WechatHttpUtils {
             }
         } catch (Exception e) {
             logger.error("create BasicHttpClientConnectionManager exception.", e);
-            throw new WechatException(e.getMessage());
+            throw e;
         }
 
         return connManager;

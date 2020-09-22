@@ -6,14 +6,28 @@ package com.xinput.wechat.enums;
  */
 public enum PayUrlEnum {
     DOMAIN("https://api.mch.weixin.qq.com", "微信支付请求路径"),
+    SANDBOX_DOMAIN("https://api.mch.weixin.qq.com/sandboxnew", "微信支付请求路径"),
+
+    GET_SIGNKEY("/getsignkey", "获取沙箱签名密钥"),
+
+    MICROPAY("/pay/micropay", "付款码付款"),
+
     UNIFIED_ORDER("/pay/unifiedorder", "统一下单"),
+
     ORDER_QUERY("/pay/orderquery", "查询订单"),
+
     CLOSE_ORDER("/pay/closeorder", "关闭订单"),
+
     REFUND("/secapi/pay/refund", "申请退款"),
+
     REFUND_QUERY("/pay/refundquery", "查询退款"),
+
     DOWNLOAD_BILL("/pay/downloadbill", "下载交易账单"),
+
     DOWNLOAD_FUND_FLOW("/pay/downloadfundflow", "下载资金账单"),
+
     PAYITIL_REPORT("/payitil/report", "交易保障"),
+
     BILL_COMMENT("/billcommentsp/batchquerycomment", "拉取订单评价数据");
 
     private String url;

@@ -59,6 +59,11 @@ public class WechatConfig {
     private static Integer wechatTimeout;
 
     /**
+     * 微信支付通知回调
+     */
+    private static String wechatNotifyUrl;
+
+    /**
      * 是否使用沙箱环境，默认是，如果想使用正式环境，设置 wechat.use.sandbox=false 即可
      */
     private static Boolean useSandbox;
@@ -113,6 +118,14 @@ public class WechatConfig {
         }
 
         return useSandbox;
+    }
+
+    public static String getWechatNotifyUrl() {
+        if (StringUtils.isNullOrEmpty(wechatNotifyUrl)) {
+            wechatNotifyUrl = get(WechatConsts.WECHAT_NOTIFY_URL);
+        }
+
+        return wechatNotifyUrl;
     }
 
 
