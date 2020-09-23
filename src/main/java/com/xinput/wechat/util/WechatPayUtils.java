@@ -57,7 +57,7 @@ public class WechatPayUtils {
 
         StringBuilder sb = new StringBuilder();
         Arrays.stream(arrayToSort).forEach(arr -> sb.append(arr));
-
+        System.out.println(sb.toString());
         sb.append("key=").append(WechatConfig.getWechatApiKey());
 
         if (SignTypeEnum.HMACSHA256.equals(signType)) {

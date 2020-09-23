@@ -9,6 +9,7 @@ import com.xinput.bleach.util.bean.BeanMapUtils;
 import com.xinput.wechat.config.WechatConfig;
 import com.xinput.wechat.enums.PayUrlEnum;
 import com.xinput.wechat.enums.SignTypeEnum;
+import com.xinput.wechat.exception.WechatException;
 import com.xinput.wechat.request.pay.CloseOrderRequest;
 import com.xinput.wechat.request.pay.DownloadBillRequest;
 import com.xinput.wechat.request.pay.MicroPayRequest;
@@ -75,18 +76,33 @@ public class WechatPayApi {
      */
     public static UnifiedOrderResponse unifiedOrder(UnifiedOrderRequest unifiedOrderRequest) throws Exception {
         String result = WechatHttpUtils.withoutCertQequest(getDomain() + PayUrlEnum.UNIFIED_ORDER.getUrl(), unifiedOrderRequest);
-        return XmlUtils.toBean(result, UnifiedOrderResponse.class);
+        Map<String, Object> params = WechatXmlUtils.toMap(result);
+        UnifiedOrderResponse response = BeanMapUtils.toBean(params, UnifiedOrderResponse.class);
+
+        // 验证签名是否合法
+        if (params.containsKey("sign")
+                && !WechatPayUtils.isSignatureValid(params, SignTypeEnum.getSignType(unifiedOrderRequest.getSign_type()))) {
+            throw new WechatException(String.format("Invalid sign value in query order response : [%s]", JsonUtils.toJsonString(response, true)));
+        }
+
+        if (!response.isSuccess()) {
+            return response;
+        }
+
+        return response;
     }
 
     /**
      * 查询订单 - 根据微信订单号
      *
      * @param transactionId 微信订单号
+     * @param outTradeNo    商户订单号
      * @return
      */
-    public static OrderQueryResponse orderQueryByTransactionId(String transactionId) throws Exception {
+    public static OrderQueryResponse orderQuery(String transactionId, String outTradeNo) throws Exception {
         OrderQueryRequest orderQueryRequest = BuilderUtils.of(OrderQueryRequest::new)
                 .with(OrderQueryRequest::setTransaction_id, transactionId)
+                .with(OrderQueryRequest::setOut_trade_no, outTradeNo)
                 .build();
 
         return orderQuery(orderQueryRequest);
@@ -98,7 +114,7 @@ public class WechatPayApi {
      * @param outTradeNo 商户订单号
      * @return
      */
-    public static OrderQueryResponse orderQueryByOutTradeNo(String outTradeNo) throws Exception {
+    public static OrderQueryResponse orderQuery(String outTradeNo) throws Exception {
         OrderQueryRequest orderQueryRequest = BuilderUtils.of(OrderQueryRequest::new)
                 .with(OrderQueryRequest::setOut_trade_no, outTradeNo)
                 .build();
@@ -117,13 +133,14 @@ public class WechatPayApi {
         Map<String, Object> params = WechatXmlUtils.toMap(result);
         OrderQueryResponse response = BeanMapUtils.toBean(params, OrderQueryResponse.class);
 
-        if (!response.isSuccess()) {
-            return response;
+        // 验证签名是否合法
+        if (params.containsKey("sign")
+                && !WechatPayUtils.isSignatureValid(params, SignTypeEnum.getSignType(orderQueryRequest.getSign_type()))) {
+            throw new WechatException(String.format("Invalid sign value in query order response : [%s]", JsonUtils.toJsonString(response, true)));
         }
 
-        // 验证签名是否合法
-        if (WechatPayUtils.isSignatureValid(params, SignTypeEnum.getSignType(orderQueryRequest.getSign_type()))) {
-            throw new Exception(String.format("Invalid sign value in XML: %s", JsonUtils.toJsonString(response, true)));
+        if (!response.isSuccess()) {
+            return response;
         }
 
         Integer couponCount = response.getCoupon_count();

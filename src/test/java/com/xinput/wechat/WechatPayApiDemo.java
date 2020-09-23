@@ -46,7 +46,7 @@ public class WechatPayApiDemo {
                 // 商户订单号,自己的订单ID
                 .with(UnifiedOrderRequest::setOut_trade_no, ObjectId.stringId())
                 // 支付金额，这边需要转成字符串类型，否则后面的签名会失败
-                .with(UnifiedOrderRequest::setTotal_fee, 102)
+                .with(UnifiedOrderRequest::setTotal_fee, 133)
                 // 支付成功后的回调地址
                 .with(UnifiedOrderRequest::setNotify_url, WechatConfig.getWechatNotifyUrl())
                 // 支付方式
@@ -73,14 +73,10 @@ public class WechatPayApiDemo {
      */
     @Test
     public void orderQuery1() {
-        String outTradeNo = "5f697af86b5adf9fdcdf60a5"; // 101
-        outTradeNo = "5f6991d36b5adfaa6b9783e6"; // 101
-        outTradeNo = "5f6996766b5adfaca6b0e21b"; // 102
-        OrderQueryRequest createOrderQueryRequest = BuilderUtils.of(OrderQueryRequest::new)
-                .with(OrderQueryRequest::setOut_trade_no, outTradeNo)
-                .build();
+        String transaction_id = "4634523320920200923160408583947";
+        String outTradeNo = "5f6996766b5adfaca6b0e21b";
         try {
-            OrderQueryResponse response = WechatPayApi.orderQuery(createOrderQueryRequest);
+            OrderQueryResponse response = WechatPayApi.orderQuery(transaction_id, outTradeNo);
             System.out.println(JsonUtils.toJsonString(response, true));
         } catch (Exception e) {
             e.printStackTrace();
@@ -95,9 +91,30 @@ public class WechatPayApiDemo {
         String outTradeNo = "5f697af86b5adf9fdcdf60a5"; // 101
         outTradeNo = "5f6991d36b5adfaa6b9783e6"; // 101
         outTradeNo = "5f6996766b5adfaca6b0e21b"; // 102
+        outTradeNo = "5f6b049c6b5adf3de4824edc"; // 用例3【公众-异常】订单金额1.30元，用户支付成功，商户未收到微信支付结果通知
+        outTradeNo = "5f6b10ab6b5adf43576f0ce9"; // 用例4【公众-异常】订单金额1.31元，用户支付失败，商户未收到微信支付结果通知
+        outTradeNo = "5f6b12c46b5adf4468b1dc1b"; // 用例5【公众-异常】订单金额1.32元，用户支付成功，微信支付重复通知商户
+        outTradeNo = "5f6b13216b5adf449cceb8d0"; // 用例6【公众-异常】订单金额1.33元，用户支付成功，微信支付通知签名非法
 
         try {
-            OrderQueryResponse response = WechatPayApi.orderQueryByOutTradeNo(outTradeNo);
+            OrderQueryResponse response = WechatPayApi.orderQuery(outTradeNo);
+            System.out.println(JsonUtils.toJsonString(response, true));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 查询订单
+     */
+    @Test
+    public void orderQuery() {
+        String outTradeNo = "5f6996766b5adfaca6b0e21b";
+        try {
+            OrderQueryRequest orderQueryRequest = BuilderUtils.of(OrderQueryRequest::new)
+                    .with(OrderQueryRequest::setOut_trade_no, outTradeNo)
+                    .build();
+            OrderQueryResponse response = WechatPayApi.orderQuery(orderQueryRequest);
             System.out.println(JsonUtils.toJsonString(response, true));
         } catch (Exception e) {
             e.printStackTrace();
