@@ -66,4 +66,13 @@ public class WechatPayUtils {
             return SecureUtils.MD5(sb.toString()).toUpperCase();
         }
     }
+
+    public static boolean isSignatureValid(Map<String, Object> data, SignTypeEnum signType) throws Exception {
+        if (!data.containsKey("sign")) {
+            return false;
+        }
+
+        String sign = String.valueOf(data.get("sign"));
+        return generateSignature(data, signType).equals(sign);
+    }
 }

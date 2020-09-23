@@ -1,6 +1,7 @@
 package com.xinput.wechat.response.pay;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.xinput.bleach.util.StringUtils;
 
 /**
  * 付款码支付返回值
@@ -303,5 +304,14 @@ public class MicroPayResponse extends BaseWeChatPayResp {
 
     public void setPromotion_detail(String promotion_detail) {
         this.promotion_detail = promotion_detail;
+    }
+
+    @Override
+    public boolean isSuccess() {
+        if (StringUtils.equalsIgnoreCase("SUCCESS", this.getReturn_code())
+                && StringUtils.equalsIgnoreCase("SUCCESS", this.getResult_code())) {
+            return true;
+        }
+        return false;
     }
 }

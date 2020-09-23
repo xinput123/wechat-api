@@ -1,6 +1,7 @@
 package com.xinput.wechat.response.pay;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.xinput.bleach.util.StringUtils;
 
 /**
  * 查询退款响应值
@@ -425,4 +426,12 @@ public class RefundQueryResponse extends BaseWeChatPayResp {
         this.refund_success_time_$n = refund_success_time_$n;
     }
 
+    @Override
+    public boolean isSuccess() {
+        if (StringUtils.equalsIgnoreCase("SUCCESS", this.getReturn_code())
+                && StringUtils.equalsIgnoreCase("SUCCESS", this.getResult_code())) {
+            return true;
+        }
+        return false;
+    }
 }

@@ -2,6 +2,7 @@ package com.xinput.wechat;
 
 import com.google.common.collect.Lists;
 import com.xinput.bleach.util.BuilderUtils;
+import com.xinput.bleach.util.JsonUtils;
 import com.xinput.bleach.util.Logs;
 import com.xinput.bleach.util.XmlUtils;
 import com.xinput.bleach.util.bean.BeanMapUtils;
@@ -116,8 +117,13 @@ public class WechatPayApi {
         Map<String, Object> params = WechatXmlUtils.toMap(result);
         OrderQueryResponse response = BeanMapUtils.toBean(params, OrderQueryResponse.class);
 
-        if (response.isFail()) {
+        if (!response.isSuccess()) {
             return response;
+        }
+
+        // 验证签名是否合法
+        if (WechatPayUtils.isSignatureValid(params, SignTypeEnum.getSignType(orderQueryRequest.getSign_type()))) {
+            throw new Exception(String.format("Invalid sign value in XML: %s", JsonUtils.toJsonString(response, true)));
         }
 
         Integer couponCount = response.getCoupon_count();
@@ -125,6 +131,7 @@ public class WechatPayApi {
             return response;
         }
 
+        // 对于微信支付返回的带有下标的 _0,_1,_2 类型参数进行封装
         List<Coupon> coupons = Lists.newArrayListWithCapacity(couponCount);
         for (int i = 0; i < couponCount; i++) {
             Coupon coupon = BuilderUtils.of(Coupon::new)

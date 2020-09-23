@@ -1,6 +1,7 @@
 package com.xinput.wechat.response.pay;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.xinput.bleach.util.StringUtils;
 
 import java.util.List;
 
@@ -367,5 +368,14 @@ public class OrderQueryResponse extends BaseWeChatPayResp {
 
     public void setSub_mch_id(String sub_mch_id) {
         this.sub_mch_id = sub_mch_id;
+    }
+
+    @Override
+    public boolean isSuccess() {
+        if (StringUtils.equalsIgnoreCase("SUCCESS", this.getReturn_code())
+                && StringUtils.equalsIgnoreCase("SUCCESS", this.getTrade_state())) {
+            return true;
+        }
+        return false;
     }
 }

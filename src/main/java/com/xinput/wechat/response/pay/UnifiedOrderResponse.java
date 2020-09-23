@@ -1,6 +1,7 @@
 package com.xinput.wechat.response.pay;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.xinput.bleach.util.StringUtils;
 
 /**
  * 统一下单返回值
@@ -85,5 +86,14 @@ public class UnifiedOrderResponse extends BaseWeChatPayResp {
 
     public void setCode_url(String code_url) {
         this.code_url = code_url;
+    }
+
+    @Override
+    public boolean isSuccess() {
+        if (StringUtils.equalsIgnoreCase("SUCCESS", this.getReturn_code())
+                && StringUtils.equalsIgnoreCase("SUCCESS", this.getResult_code())) {
+            return true;
+        }
+        return false;
     }
 }

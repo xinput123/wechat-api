@@ -1,6 +1,7 @@
 package com.xinput.wechat.response.pay;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.xinput.bleach.util.StringUtils;
 
 /**
  * 关闭订单响应值
@@ -31,4 +32,12 @@ public class CloseOrderResponse extends BaseWeChatPayResp {
         this.result_msg = result_msg;
     }
 
+    @Override
+    public boolean isSuccess() {
+        if (StringUtils.equalsIgnoreCase("SUCCESS", this.getReturn_code())
+                && StringUtils.equalsIgnoreCase("SUCCESS", this.getResult_code())) {
+            return true;
+        }
+        return false;
+    }
 }

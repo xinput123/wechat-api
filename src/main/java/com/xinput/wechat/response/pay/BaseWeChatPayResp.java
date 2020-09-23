@@ -1,13 +1,13 @@
 package com.xinput.wechat.response.pay;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
-import com.xinput.bleach.util.StringUtils;
 
 /**
  * @author <a href="mailto:xinput.xx@gmail.com">xinput</a>
  * @date 2020-09-16 20:04
  */
-public class BaseWeChatPayResp {
+public abstract class BaseWeChatPayResp {
 
     // 返回结果
     /**
@@ -39,6 +39,7 @@ public class BaseWeChatPayResp {
      * 示例值: wx8888888888888888
      * 描述: 调用接口提交的小程序ID
      */
+    @JsonIgnore
     @XStreamAlias("appid")
     private String appid;
 
@@ -49,6 +50,7 @@ public class BaseWeChatPayResp {
      * 示例值: 1900000109
      * 描述: 调用接口提交的商户号
      */
+    @JsonIgnore
     @XStreamAlias("mch_id")
     private String mch_id;
 
@@ -175,11 +177,6 @@ public class BaseWeChatPayResp {
         this.err_code_des = err_code_des;
     }
 
-    public boolean isFail() {
-        if (StringUtils.equalsIgnoreCase("FAIL", this.return_code)) {
-            return true;
-        }
+    public abstract boolean isSuccess();
 
-        return false;
-    }
 }
