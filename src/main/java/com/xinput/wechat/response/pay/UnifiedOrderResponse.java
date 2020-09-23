@@ -29,10 +29,10 @@ public class UnifiedOrderResponse extends BaseWeChatPayResp {
      * 必填: 是
      * 类型: String(16)
      * 示例值: JSAPI
-     * 描述: {@link com.xinput.wechatpay.consts.TradeTypeEnum}
+     * 描述: {@link com.xinput.wechat.enums.TradeTypeEnum}
      */
     @XStreamAlias("trade_type")
-    private String tradeType;
+    private String trade_type;
 
     /**
      * 预支付交易会话标识
@@ -53,7 +53,7 @@ public class UnifiedOrderResponse extends BaseWeChatPayResp {
      * 注意: code_url的值并非固定，使用时按照URL格式转成二维码即可
      */
     @XStreamAlias("code_url")
-    private String codeUrl;
+    private String code_url;
 
     public String getDevice_info() {
         return device_info;
@@ -63,12 +63,12 @@ public class UnifiedOrderResponse extends BaseWeChatPayResp {
         this.device_info = device_info;
     }
 
-    public String getTradeType() {
-        return tradeType;
+    public String getTrade_type() {
+        return trade_type;
     }
 
-    public void setTradeType(String tradeType) {
-        this.tradeType = tradeType;
+    public void setTrade_type(String trade_type) {
+        this.trade_type = trade_type;
     }
 
     public String getPrepay_id() {
@@ -79,12 +79,11 @@ public class UnifiedOrderResponse extends BaseWeChatPayResp {
         this.prepay_id = prepay_id;
     }
 
-    public String getCodeUrl() {
-        return codeUrl;
+    public String getCode_url() {
+        return code_url;
     }
 
-    public void setCodeUrl(String codeUrl) {
-        this.codeUrl = codeUrl;
+    public void setCode_url(String code_url) {
+        this.code_url = code_url;
     }
-
 }

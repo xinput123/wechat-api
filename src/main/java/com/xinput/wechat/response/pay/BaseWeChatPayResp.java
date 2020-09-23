@@ -1,6 +1,7 @@
 package com.xinput.wechat.response.pay;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.xinput.bleach.util.StringUtils;
 
 /**
  * @author <a href="mailto:xinput.xx@gmail.com">xinput</a>
@@ -17,7 +18,7 @@ public class BaseWeChatPayResp {
      * 描述: SUCCESS/FAIL 此字段是通信标识，非交易标识，交易是否成功需要查看result_code来判断
      */
     @XStreamAlias("return_code")
-    private String returnCode;
+    private String return_code;
 
     /**
      * 返回信息
@@ -27,7 +28,7 @@ public class BaseWeChatPayResp {
      * 描述: 返回信息，如非空，为错误原因: 签名失败、参数格式校验错误
      */
     @XStreamAlias("return_msg")
-    private String returnMsg;
+    private String return_msg;
 
     // 以下字段在return_code为SUCCESS的时候有返回
 
@@ -49,7 +50,7 @@ public class BaseWeChatPayResp {
      * 描述: 调用接口提交的商户号
      */
     @XStreamAlias("mch_id")
-    private String mchId;
+    private String mch_id;
 
     /**
      * 随机字符串
@@ -59,7 +60,7 @@ public class BaseWeChatPayResp {
      * 描述: 随机字符串，长度要求在32位以内。推荐 https://pay.weixin.qq.com/wiki/doc/api/wxa/wxa_api.php?chapter=4_3
      */
     @XStreamAlias("nonce_str")
-    private String nonceStr;
+    private String nonce_str;
 
     /**
      * 签名
@@ -79,7 +80,7 @@ public class BaseWeChatPayResp {
      * 描述: SUCCESS/FAIL
      */
     @XStreamAlias("result_code")
-    private String resultCode;
+    private String result_code;
 
     /**
      * 错误代码
@@ -89,7 +90,7 @@ public class BaseWeChatPayResp {
      * 描述:
      */
     @XStreamAlias("err_code")
-    private String errCode;
+    private String err_code;
 
     /**
      * 错误代码描述
@@ -99,23 +100,23 @@ public class BaseWeChatPayResp {
      * 描述: 错误信息描述
      */
     @XStreamAlias("err_code_des")
-    private String errCodeDesc;
+    private String err_code_des;
 
 
-    public String getReturnCode() {
-        return returnCode;
+    public String getReturn_code() {
+        return return_code;
     }
 
-    public void setReturnCode(String returnCode) {
-        this.returnCode = returnCode;
+    public void setReturn_code(String return_code) {
+        this.return_code = return_code;
     }
 
-    public String getReturnMsg() {
-        return returnMsg;
+    public String getReturn_msg() {
+        return return_msg;
     }
 
-    public void setReturnMsg(String returnMsg) {
-        this.returnMsg = returnMsg;
+    public void setReturn_msg(String return_msg) {
+        this.return_msg = return_msg;
     }
 
     public String getAppid() {
@@ -126,20 +127,20 @@ public class BaseWeChatPayResp {
         this.appid = appid;
     }
 
-    public String getMchId() {
-        return mchId;
+    public String getMch_id() {
+        return mch_id;
     }
 
-    public void setMchId(String mchId) {
-        this.mchId = mchId;
+    public void setMch_id(String mch_id) {
+        this.mch_id = mch_id;
     }
 
-    public String getNonceStr() {
-        return nonceStr;
+    public String getNonce_str() {
+        return nonce_str;
     }
 
-    public void setNonceStr(String nonceStr) {
-        this.nonceStr = nonceStr;
+    public void setNonce_str(String nonce_str) {
+        this.nonce_str = nonce_str;
     }
 
     public String getSign() {
@@ -150,28 +151,35 @@ public class BaseWeChatPayResp {
         this.sign = sign;
     }
 
-    public String getResultCode() {
-        return resultCode;
+    public String getResult_code() {
+        return result_code;
     }
 
-    public void setResultCode(String resultCode) {
-        this.resultCode = resultCode;
+    public void setResult_code(String result_code) {
+        this.result_code = result_code;
     }
 
-    public String getErrCode() {
-        return errCode;
+    public String getErr_code() {
+        return err_code;
     }
 
-    public void setErrCode(String errCode) {
-        this.errCode = errCode;
+    public void setErr_code(String err_code) {
+        this.err_code = err_code;
     }
 
-    public String getErrCodeDesc() {
-        return errCodeDesc;
+    public String getErr_code_des() {
+        return err_code_des;
     }
 
-    public void setErrCodeDesc(String errCodeDesc) {
-        this.errCodeDesc = errCodeDesc;
+    public void setErr_code_des(String err_code_des) {
+        this.err_code_des = err_code_des;
     }
 
+    public boolean isFail() {
+        if (StringUtils.equalsIgnoreCase("FAIL", this.return_code)) {
+            return true;
+        }
+
+        return false;
+    }
 }

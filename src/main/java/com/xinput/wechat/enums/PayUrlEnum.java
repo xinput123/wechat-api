@@ -14,7 +14,7 @@ public enum PayUrlEnum {
 
     UNIFIED_ORDER("/pay/unifiedorder", "统一下单"),
 
-    ORDER_QUERY("/pay/orderquery", "查询订单"),
+    ORDER_QUERY("/pay/orderquery", "查询订单(不需要证书)"),
 
     CLOSE_ORDER("/pay/closeorder", "关闭订单"),
 

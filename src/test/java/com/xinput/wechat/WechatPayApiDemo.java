@@ -72,17 +72,32 @@ public class WechatPayApiDemo {
      * 查询订单
      */
     @Test
-    public void orderQuery() {
+    public void orderQuery1() {
         String outTradeNo = "5f697af86b5adf9fdcdf60a5"; // 101
         outTradeNo = "5f6991d36b5adfaa6b9783e6"; // 101
         outTradeNo = "5f6996766b5adfaca6b0e21b"; // 102
         OrderQueryRequest createOrderQueryRequest = BuilderUtils.of(OrderQueryRequest::new)
-                // 通过统一下单接口返回的 prepayId 的值
-//                .with(OrderQueryRequest::setTransaction_id, "4200000764202009188340047847")
                 .with(OrderQueryRequest::setOut_trade_no, outTradeNo)
                 .build();
         try {
             OrderQueryResponse response = WechatPayApi.orderQuery(createOrderQueryRequest);
+            System.out.println(JsonUtils.toJsonString(response, true));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 查询订单
+     */
+    @Test
+    public void orderQuery2() {
+        String outTradeNo = "5f697af86b5adf9fdcdf60a5"; // 101
+        outTradeNo = "5f6991d36b5adfaa6b9783e6"; // 101
+        outTradeNo = "5f6996766b5adfaca6b0e21b"; // 102
+
+        try {
+            OrderQueryResponse response = WechatPayApi.orderQueryByOutTradeNo(outTradeNo);
             System.out.println(JsonUtils.toJsonString(response, true));
         } catch (Exception e) {
             e.printStackTrace();

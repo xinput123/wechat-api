@@ -1,5 +1,7 @@
 package com.xinput.wechat;
 
+import com.google.common.collect.Lists;
+import com.xinput.bleach.util.BuilderUtils;
 import com.xinput.bleach.util.Logs;
 import com.xinput.bleach.util.XmlUtils;
 import com.xinput.bleach.util.bean.BeanMapUtils;
@@ -15,6 +17,7 @@ import com.xinput.wechat.request.pay.RefundRequest;
 import com.xinput.wechat.request.pay.SandboxSignKeyRequest;
 import com.xinput.wechat.request.pay.UnifiedOrderRequest;
 import com.xinput.wechat.response.pay.CloseOrderResponse;
+import com.xinput.wechat.response.pay.Coupon;
 import com.xinput.wechat.response.pay.MicroPayResponse;
 import com.xinput.wechat.response.pay.OrderQueryResponse;
 import com.xinput.wechat.response.pay.RefundQueryResponse;
@@ -23,7 +26,11 @@ import com.xinput.wechat.response.pay.SandboxSignKeyResponse;
 import com.xinput.wechat.response.pay.UnifiedOrderResponse;
 import com.xinput.wechat.util.WechatHttpUtils;
 import com.xinput.wechat.util.WechatPayUtils;
+import com.xinput.wechat.util.WechatXmlUtils;
 import org.slf4j.Logger;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:xinput.xx@gmail.com">xinput</a>
@@ -46,7 +53,7 @@ public class WechatPayApi {
                 WechatPayUtils.generateSignature(BeanMapUtils.toMap(sandboxSignKeyRequest), SignTypeEnum.MD5));
 
         String result = WechatHttpUtils.execute(getDomain() + PayUrlEnum.GET_SIGNKEY.getUrl(), XmlUtils.toXml(sandboxSignKeyRequest), false);
-        System.out.println(result);
+        logger.info("result : [{}].", result);
         return XmlUtils.toBean(result, SandboxSignKeyResponse.class);
     }
 
@@ -71,14 +78,67 @@ public class WechatPayApi {
     }
 
     /**
-     * 查询订单 - 不需要证书
+     * 查询订单 - 根据微信订单号
      *
-     * @param orderQueryRequest
+     * @param transactionId 微信订单号
+     * @return
+     */
+    public static OrderQueryResponse orderQueryByTransactionId(String transactionId) throws Exception {
+        OrderQueryRequest orderQueryRequest = BuilderUtils.of(OrderQueryRequest::new)
+                .with(OrderQueryRequest::setTransaction_id, transactionId)
+                .build();
+
+        return orderQuery(orderQueryRequest);
+    }
+
+    /**
+     * 查询订单 - 根据商户订单号
+     *
+     * @param outTradeNo 商户订单号
+     * @return
+     */
+    public static OrderQueryResponse orderQueryByOutTradeNo(String outTradeNo) throws Exception {
+        OrderQueryRequest orderQueryRequest = BuilderUtils.of(OrderQueryRequest::new)
+                .with(OrderQueryRequest::setOut_trade_no, outTradeNo)
+                .build();
+
+        return orderQuery(orderQueryRequest);
+    }
+
+    /**
+     * 查询订单
+     *
+     * @param orderQueryRequest 查询订单请求参数
      * @return
      */
     public static OrderQueryResponse orderQuery(OrderQueryRequest orderQueryRequest) throws Exception {
         String result = WechatHttpUtils.withoutCertQequest(getDomain() + PayUrlEnum.ORDER_QUERY.getUrl(), orderQueryRequest);
-        return XmlUtils.toBean(result, OrderQueryResponse.class);
+        Map<String, Object> params = WechatXmlUtils.toMap(result);
+        OrderQueryResponse response = BeanMapUtils.toBean(params, OrderQueryResponse.class);
+
+        if (response.isFail()) {
+            return response;
+        }
+
+        Integer couponCount = response.getCoupon_count();
+        if (couponCount == null || couponCount < 1) {
+            return response;
+        }
+
+        List<Coupon> coupons = Lists.newArrayListWithCapacity(couponCount);
+        for (int i = 0; i < couponCount; i++) {
+            Coupon coupon = BuilderUtils.of(Coupon::new)
+                    .with(Coupon::setIndex, i)
+                    .with(Coupon::setCoupon_id, String.valueOf(params.get("coupon_id_" + i)))
+                    .with(Coupon::setCoupon_type, String.valueOf(params.get("coupon_type_" + i)))
+                    .with(Coupon::setCoupon_fee, Integer.valueOf(String.valueOf(params.get("coupon_fee_" + i))))
+                    .with(Coupon::setCoupon_batch, String.valueOf(params.get("coupon_batch_id_" + i)))
+                    .build();
+            coupons.add(coupon);
+        }
+
+        response.setCoupons(coupons);
+        return response;
     }
 
     /**

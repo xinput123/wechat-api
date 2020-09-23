@@ -2,6 +2,8 @@ package com.xinput.wechat.response.pay;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
+import java.util.List;
+
 /**
  * 查询订单返回值
  *
@@ -44,6 +46,16 @@ public class OrderQueryResponse extends BaseWeChatPayResp {
     private String is_subscribe;
 
     /**
+     * 子商户号
+     * 必填: 否
+     * 类型: String(32)
+     * 示例值: Y
+     * 描述: 子商户号
+     */
+    @XStreamAlias("sub_mch_id")
+    private String sub_mch_id;
+
+    /**
      * 交易类型
      * 必填: 是
      * 类型: String(16)
@@ -59,7 +71,7 @@ public class OrderQueryResponse extends BaseWeChatPayResp {
      * 必填: 是
      * 类型: String(32)
      * 示例值: SUCCESS
-     * 描述: {@link com.xinput.wechatpay.consts.TradeStateEnum}
+     * 描述: {@link com.xinput.wechat.enums.TradeStateEnum}
      */
     @XStreamAlias("trade_state")
     private String trade_state;
@@ -70,7 +82,7 @@ public class OrderQueryResponse extends BaseWeChatPayResp {
      * 类型: String(16)
      * 示例值: CMC
      * 描述: 银行类型，采用字符串类型的银行标识
-     * {@link com.xinput.wechatpay.consts.BankConsts}
+     * {@link com.xinput.wechat.enums.BankEnum}
      */
     @XStreamAlias("bank_type")
     private String bank_type;
@@ -145,38 +157,7 @@ public class OrderQueryResponse extends BaseWeChatPayResp {
     @XStreamAlias("coupon_count")
     private Integer coupon_count;
 
-    /**
-     * 代金券类型
-     * 必填: 否
-     * 类型: String
-     * 示例值: CASH
-     * 描述: CASH--充值代金券
-     * NO_CASH---非充值优惠券
-     * <p>
-     * 开通免充值券功能，并且订单使用了优惠券后有返回（取值：CASH、NO_CASH）。$n为下标,从0开始编号，举例：coupon_type_$0
-     */
-    @XStreamAlias("coupon_type_$n")
-    private String coupon_type_$n;
-
-    /**
-     * 代金券ID
-     * 必填: 否
-     * 类型: String(20)
-     * 示例值: 10000
-     * 描述: 代金券ID, $n为下标，从0开始编号
-     */
-    @XStreamAlias("coupon_id_$n")
-    private String coupon_id_$n;
-
-    /**
-     * 单个代金券支付金额
-     * 必填: 否
-     * 类型: Int
-     * 示例值: 100
-     * 描述: 单个代金券支付金额, $n为下标，从0开始编号
-     */
-    @XStreamAlias("coupon_fee_$n")
-    private Integer coupon_fee_$n;
+    private List<Coupon> coupons;
 
     /**
      * 微信支付单号
@@ -332,28 +313,12 @@ public class OrderQueryResponse extends BaseWeChatPayResp {
         this.coupon_count = coupon_count;
     }
 
-    public String getCoupon_type_$n() {
-        return coupon_type_$n;
+    public List<Coupon> getCoupons() {
+        return coupons;
     }
 
-    public void setCoupon_type_$n(String coupon_type_$n) {
-        this.coupon_type_$n = coupon_type_$n;
-    }
-
-    public String getCoupon_id_$n() {
-        return coupon_id_$n;
-    }
-
-    public void setCoupon_id_$n(String coupon_id_$n) {
-        this.coupon_id_$n = coupon_id_$n;
-    }
-
-    public Integer getCoupon_fee_$n() {
-        return coupon_fee_$n;
-    }
-
-    public void setCoupon_fee_$n(Integer coupon_fee_$n) {
-        this.coupon_fee_$n = coupon_fee_$n;
+    public void setCoupons(List<Coupon> coupons) {
+        this.coupons = coupons;
     }
 
     public String getTransaction_id() {
@@ -394,5 +359,13 @@ public class OrderQueryResponse extends BaseWeChatPayResp {
 
     public void setTrade_state_desc(String trade_state_desc) {
         this.trade_state_desc = trade_state_desc;
+    }
+
+    public String getSub_mch_id() {
+        return sub_mch_id;
+    }
+
+    public void setSub_mch_id(String sub_mch_id) {
+        this.sub_mch_id = sub_mch_id;
     }
 }

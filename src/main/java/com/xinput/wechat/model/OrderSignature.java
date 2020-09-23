@@ -1,10 +1,10 @@
 package com.xinput.wechat.model;
 
 import com.xinput.bleach.util.ObjectId;
+import com.xinput.bleach.util.SecureUtils;
 import com.xinput.wechat.config.WechatConfig;
 import com.xinput.wechat.enums.SignTypeEnum;
 import com.xinput.wechat.response.pay.UnifiedOrderResponse;
-import com.xinput.wechat.util.WechatPayUtils;
 
 /**
  * 统一下单后数据签名
@@ -43,9 +43,9 @@ public class OrderSignature {
                 + "&key=" + WechatConfig.getWechatApiKey();
 
         if (WechatConfig.getUseSandbox()) {
-            this.paySign = WechatPayUtils.MD5(stringSignTemp);
+            this.paySign = SecureUtils.MD5(stringSignTemp);
         } else {
-            this.paySign = WechatPayUtils.HMACSHA256(stringSignTemp, WechatConfig.getWechatApiKey());
+            this.paySign = SecureUtils.HMACSHA256(stringSignTemp, WechatConfig.getWechatApiKey());
         }
     }
 

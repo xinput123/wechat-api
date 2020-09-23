@@ -13,10 +13,10 @@ public class SandboxSignKeyResponse {
     private String returnCode;
 
     @XStreamAlias("return_msg")
-    private String returnMsg;
+    private String return_msg;
 
     @XStreamAlias("sandbox_signkey")
-    private String sandboxSignkey;
+    private String sandbox_signkey;
 
     public String getReturnCode() {
         return returnCode;
@@ -26,19 +26,19 @@ public class SandboxSignKeyResponse {
         this.returnCode = returnCode;
     }
 
-    public String getReturnMsg() {
-        return returnMsg;
+    public String getReturn_msg() {
+        return return_msg;
     }
 
-    public void setReturnMsg(String returnMsg) {
-        this.returnMsg = returnMsg;
+    public void setReturn_msg(String return_msg) {
+        this.return_msg = return_msg;
     }
 
-    public String getSandboxSignkey() {
-        return sandboxSignkey;
+    public String getSandbox_signkey() {
+        return sandbox_signkey;
     }
 
-    public void setSandboxSignkey(String sandboxSignkey) {
-        this.sandboxSignkey = sandboxSignkey;
+    public void setSandbox_signkey(String sandbox_signkey) {
+        this.sandbox_signkey = sandbox_signkey;
     }
 }

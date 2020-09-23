@@ -33,7 +33,7 @@ public class MicroPayResponse extends BaseWeChatPayResp {
      * 描述: 用户在商户appid 下的唯一标识
      */
     @XStreamAlias("openid")
-    private String openId;
+    private String openid;
 
     /**
      * 是否关注公众账号
@@ -43,7 +43,7 @@ public class MicroPayResponse extends BaseWeChatPayResp {
      * 描述: 用户是否关注公众账号，仅在公众账号类型支付有效，取值范围：Y或N;Y-关注;N-未关注
      */
     @XStreamAlias("is_subscribe")
-    private String isSubscribe;
+    private String is_subscribe;
 
     /**
      * 交易类型
@@ -53,7 +53,7 @@ public class MicroPayResponse extends BaseWeChatPayResp {
      * 描述: MICROPAY 付款码支付
      */
     @XStreamAlias("trade_type")
-    private String tradeType;
+    private String trade_type;
 
     /**
      * 付款银行
@@ -64,7 +64,7 @@ public class MicroPayResponse extends BaseWeChatPayResp {
      * {@link com.xinput.wechat.enums.BankEnum}
      */
     @XStreamAlias("bank_type")
-    private String bankType;
+    private String bank_type;
 
     /**
      * 标价币种
@@ -74,7 +74,7 @@ public class MicroPayResponse extends BaseWeChatPayResp {
      * 描述: 货币类型，符合ISO 4217标准的三位字母代码，默认人民币：CNY
      */
     @XStreamAlias("fee_type")
-    private String feeType;
+    private String fee_type;
 
     /**
      * 标价金额
@@ -84,7 +84,7 @@ public class MicroPayResponse extends BaseWeChatPayResp {
      * 描述: 订单总金额，单位为分
      */
     @XStreamAlias("total_fee")
-    private Integer totalFee;
+    private Integer total_fee;
 
     /**
      * 应结订单金额
@@ -94,7 +94,7 @@ public class MicroPayResponse extends BaseWeChatPayResp {
      * 描述: 当订单使用了免充值型优惠券后返回该参数，应结订单金额=订单金额-免充值优惠券金额。
      */
     @XStreamAlias("settlement_total_fee")
-    private Integer settlementTotalFee;
+    private Integer settlement_total_fee;
 
     /**
      * 代金券金额
@@ -144,7 +144,7 @@ public class MicroPayResponse extends BaseWeChatPayResp {
      * 描述: 商户系统内部订单号，要求32个字符内，只能是数字、大小写字母_-|*@ ，且在同一个商户号下唯一
      */
     @XStreamAlias("out_trade_no")
-    private String outTradeNo;
+    private String out_trade_no;
 
     /**
      * 商家数据包
@@ -164,7 +164,7 @@ public class MicroPayResponse extends BaseWeChatPayResp {
      * 描述: 订单支付时间，格式为yyyyMMddHHmmss，如2009年12月25日9点10分10秒表示为20091225091010
      */
     @XStreamAlias("time_end")
-    private String timeEnd;
+    private String time_end;
 
     /**
      * 营销详情
@@ -175,7 +175,7 @@ public class MicroPayResponse extends BaseWeChatPayResp {
      * https://pay.weixin.qq.com/wiki/doc/api/danpin.php?chapter=9_101&index=1
      */
     @XStreamAlias("promotion_detail")
-    private String promotionDetail;
+    private String promotion_detail;
 
     public String getDevice_info() {
         return device_info;
@@ -185,60 +185,60 @@ public class MicroPayResponse extends BaseWeChatPayResp {
         this.device_info = device_info;
     }
 
-    public String getOpenId() {
-        return openId;
+    public String getOpenid() {
+        return openid;
     }
 
-    public void setOpenId(String openId) {
-        this.openId = openId;
+    public void setOpenid(String openid) {
+        this.openid = openid;
     }
 
-    public String getIsSubscribe() {
-        return isSubscribe;
+    public String getIs_subscribe() {
+        return is_subscribe;
     }
 
-    public void setIsSubscribe(String isSubscribe) {
-        this.isSubscribe = isSubscribe;
+    public void setIs_subscribe(String is_subscribe) {
+        this.is_subscribe = is_subscribe;
     }
 
-    public String getTradeType() {
-        return tradeType;
+    public String getTrade_type() {
+        return trade_type;
     }
 
-    public void setTradeType(String tradeType) {
-        this.tradeType = tradeType;
+    public void setTrade_type(String trade_type) {
+        this.trade_type = trade_type;
     }
 
-    public String getBankType() {
-        return bankType;
+    public String getBank_type() {
+        return bank_type;
     }
 
-    public void setBankType(String bankType) {
-        this.bankType = bankType;
+    public void setBank_type(String bank_type) {
+        this.bank_type = bank_type;
     }
 
-    public String getFeeType() {
-        return feeType;
+    public String getFee_type() {
+        return fee_type;
     }
 
-    public void setFeeType(String feeType) {
-        this.feeType = feeType;
+    public void setFee_type(String fee_type) {
+        this.fee_type = fee_type;
     }
 
-    public Integer getTotalFee() {
-        return totalFee;
+    public Integer getTotal_fee() {
+        return total_fee;
     }
 
-    public void setTotalFee(Integer totalFee) {
-        this.totalFee = totalFee;
+    public void setTotal_fee(Integer total_fee) {
+        this.total_fee = total_fee;
     }
 
-    public Integer getSettlementTotalFee() {
-        return settlementTotalFee;
+    public Integer getSettlement_total_fee() {
+        return settlement_total_fee;
     }
 
-    public void setSettlementTotalFee(Integer settlementTotalFee) {
-        this.settlementTotalFee = settlementTotalFee;
+    public void setSettlement_total_fee(Integer settlement_total_fee) {
+        this.settlement_total_fee = settlement_total_fee;
     }
 
     public Integer getCoupon_fee() {
@@ -273,12 +273,12 @@ public class MicroPayResponse extends BaseWeChatPayResp {
         this.transaction_id = transaction_id;
     }
 
-    public String getOutTradeNo() {
-        return outTradeNo;
+    public String getOut_trade_no() {
+        return out_trade_no;
     }
 
-    public void setOutTradeNo(String outTradeNo) {
-        this.outTradeNo = outTradeNo;
+    public void setOut_trade_no(String out_trade_no) {
+        this.out_trade_no = out_trade_no;
     }
 
     public String getAttach() {
@@ -289,19 +289,19 @@ public class MicroPayResponse extends BaseWeChatPayResp {
         this.attach = attach;
     }
 
-    public String getTimeEnd() {
-        return timeEnd;
+    public String getTime_end() {
+        return time_end;
     }
 
-    public void setTimeEnd(String timeEnd) {
-        this.timeEnd = timeEnd;
+    public void setTime_end(String time_end) {
+        this.time_end = time_end;
     }
 
-    public String getPromotionDetail() {
-        return promotionDetail;
+    public String getPromotion_detail() {
+        return promotion_detail;
     }
 
-    public void setPromotionDetail(String promotionDetail) {
-        this.promotionDetail = promotionDetail;
+    public void setPromotion_detail(String promotion_detail) {
+        this.promotion_detail = promotion_detail;
     }
 }
