@@ -73,15 +73,15 @@ public final class WechatHttpUtils {
     }
 
     public static String execute(String url, String data, boolean useCert) throws Exception {
-        String certPath = null;
-        String certPass = null;
+        String certPath = WechatConfig.getWechatApiCertPath();
+        String certPass = WechatConfig.getWechatMchId();
         if (useCert) {
-            if (StringUtils.isNullOrEmpty(WechatConfig.getWechatApiCertPath())) {
+            if (StringUtils.isNullOrEmpty(certPath)) {
                 logger.error("[wechat.api.cert.path] not found.");
                 throw new WechatException("wechat.api.cert.path not found.");
             }
 
-            if (StringUtils.isNullOrEmpty(WechatConfig.getWechatMchId())) {
+            if (StringUtils.isNullOrEmpty(certPass)) {
                 logger.error("[wechat.mch.id] not found.");
                 throw new WechatException("wechat.api.cert.path not found.");
             }

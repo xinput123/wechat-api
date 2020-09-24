@@ -46,7 +46,7 @@ public class WechatPayApiDemo {
                 // 商户订单号,自己的订单ID
                 .with(UnifiedOrderRequest::setOut_trade_no, ObjectId.stringId())
                 // 支付金额，这边需要转成字符串类型，否则后面的签名会失败
-                .with(UnifiedOrderRequest::setTotal_fee, 133)
+                .with(UnifiedOrderRequest::setTotal_fee, 102)
                 // 支付成功后的回调地址
                 .with(UnifiedOrderRequest::setNotify_url, WechatConfig.getWechatNotifyUrl())
                 // 支付方式
@@ -91,10 +91,11 @@ public class WechatPayApiDemo {
         String outTradeNo = "5f697af86b5adf9fdcdf60a5"; // 101
         outTradeNo = "5f6991d36b5adfaa6b9783e6"; // 101
         outTradeNo = "5f6996766b5adfaca6b0e21b"; // 102
-        outTradeNo = "5f6b049c6b5adf3de4824edc"; // 用例3【公众-异常】订单金额1.30元，用户支付成功，商户未收到微信支付结果通知
-        outTradeNo = "5f6b10ab6b5adf43576f0ce9"; // 用例4【公众-异常】订单金额1.31元，用户支付失败，商户未收到微信支付结果通知
-        outTradeNo = "5f6b12c46b5adf4468b1dc1b"; // 用例5【公众-异常】订单金额1.32元，用户支付成功，微信支付重复通知商户
-        outTradeNo = "5f6b13216b5adf449cceb8d0"; // 用例6【公众-异常】订单金额1.33元，用户支付成功，微信支付通知签名非法
+//        outTradeNo = "5f6b049c6b5adf3de4824edc"; // 用例3【公众-异常】订单金额1.30元，用户支付成功，商户未收到微信支付结果通知
+//        outTradeNo = "5f6b10ab6b5adf43576f0ce9"; // 用例4【公众-异常】订单金额1.31元，用户支付失败，商户未收到微信支付结果通知
+//        outTradeNo = "5f6b12c46b5adf4468b1dc1b"; // 用例5【公众-异常】订单金额1.32元，用户支付成功，微信支付重复通知商户
+//        outTradeNo = "5f6b13216b5adf449cceb8d0"; // 用例6【公众-异常】订单金额1.33元，用户支付成功，微信支付通知签名非法
+//        outTradeNo = "5f6b1e8e6b5adf4fc2ca1b0f"; // 用例7【公众-异常】订单金额1.34元，用户支付成功，微信支付通知关键信息不一致
 
         try {
             OrderQueryResponse response = WechatPayApi.orderQuery(outTradeNo);
@@ -109,7 +110,7 @@ public class WechatPayApiDemo {
      */
     @Test
     public void orderQuery() {
-        String outTradeNo = "5f6996766b5adfaca6b0e21b";
+        String outTradeNo = "5f6b35706b5adf5e85d457de";
         try {
             OrderQueryRequest orderQueryRequest = BuilderUtils.of(OrderQueryRequest::new)
                     .with(OrderQueryRequest::setOut_trade_no, outTradeNo)
@@ -127,10 +128,24 @@ public class WechatPayApiDemo {
     @Test
     public void closeOrder() {
         CloseOrderRequest closeOrderRequest = BuilderUtils.of(CloseOrderRequest::new)
-                .with(CloseOrderRequest::setOut_trade_no, "5f641e562803199a3ee5281a")
+                .with(CloseOrderRequest::setOut_trade_no, "5f6991d36b5adfaa6b9783e6")
                 .build();
         try {
             CloseOrderResponse response = WechatPayApi.closeOrder(closeOrderRequest);
+            System.out.println(JsonUtils.toJsonString(response, true));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 关闭订单
+     */
+    @Test
+    public void closeOrder2() {
+        String outTradeNo = "5f6991d36b5adfaa6b9783e6"; // 101
+        try {
+            CloseOrderResponse response = WechatPayApi.closeOrder(outTradeNo);
             System.out.println(JsonUtils.toJsonString(response, true));
         } catch (Exception e) {
             e.printStackTrace();
@@ -146,19 +161,36 @@ public class WechatPayApiDemo {
         System.out.println("out_refund_no = " + out_refund_no);
         logger.info("out_refund_no = {}", out_refund_no);
 
+        String outTradeNo = "";
+        outTradeNo = "5f6991d36b5adfaa6b9783e6"; // 101
+        outTradeNo = "5f6996766b5adfaca6b0e21b"; // 102
+        outTradeNo = "5f6b35706b5adf5e85d457de";
+
         RefundRequest request = BuilderUtils.of(RefundRequest::new)
-                // 通过统一下单接口返回的 prepayId 的值
-                .with(RefundRequest::setTransaction_id, "4200000764202009188340047847")
-                .with(RefundRequest::setOut_trade_no, "5f646c8d280319c40fde6bf9")
+                .with(RefundRequest::setOut_trade_no, outTradeNo)
                 .with(RefundRequest::setOut_refund_no, out_refund_no)
-                .with(RefundRequest::setTotal_fee, 100)
-                .with(RefundRequest::setRefund_fee, 10)
+                .with(RefundRequest::setTotal_fee, 502)
+                .with(RefundRequest::setRefund_fee, 502)
                 .with(RefundRequest::setNotify_url, WechatConfig.getWechatNotifyUrl())
                 .build();
         logger.info("申请退款数据 : {}", JsonUtils.toJsonString(request, true));
         try {
             RefundResponse response = WechatPayApi.refund(request);
-            System.out.println(JsonUtils.toJsonString(response, true));
+            logger.info(JsonUtils.toJsonString(response, true));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 申请退款
+     */
+    @Test
+    public void refund2() {
+        String outTradeNo = "5f6b35706b5adf5e85d457de";
+        try {
+            RefundResponse response = WechatPayApi.refund(outTradeNo, 502, 502);
+            logger.info(JsonUtils.toJsonString(response, true));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -170,8 +202,8 @@ public class WechatPayApiDemo {
     @Test
     public void refundquery() {
         RefundQueryRequest request = BuilderUtils.of(RefundQueryRequest::new)
-                .with(RefundQueryRequest::setTransaction_id, "4200000764202009188340047847")
-                .with(RefundQueryRequest::setOut_trade_no, "5f646c8d280319c40fde6bf9")
+//                .with(RefundQueryRequest::setTransaction_id, "4274180775120200924120824396328")
+                .with(RefundQueryRequest::setOut_trade_no, "5f6b35706b5adf5e85d457de")
                 .build();
         logger.info("查询退款:{}.", JsonUtils.toJsonString(request));
 

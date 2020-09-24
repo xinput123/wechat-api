@@ -4,6 +4,8 @@ import com.google.common.collect.Lists;
 import com.xinput.bleach.util.BuilderUtils;
 import com.xinput.bleach.util.JsonUtils;
 import com.xinput.bleach.util.Logs;
+import com.xinput.bleach.util.ObjectId;
+import com.xinput.bleach.util.StringUtils;
 import com.xinput.bleach.util.XmlUtils;
 import com.xinput.bleach.util.bean.BeanMapUtils;
 import com.xinput.wechat.config.WechatConfig;
@@ -22,6 +24,9 @@ import com.xinput.wechat.response.pay.CloseOrderResponse;
 import com.xinput.wechat.response.pay.Coupon;
 import com.xinput.wechat.response.pay.MicroPayResponse;
 import com.xinput.wechat.response.pay.OrderQueryResponse;
+import com.xinput.wechat.response.pay.QueryRefund;
+import com.xinput.wechat.response.pay.QueryRefundDetail;
+import com.xinput.wechat.response.pay.RefundCoupon;
 import com.xinput.wechat.response.pay.RefundQueryResponse;
 import com.xinput.wechat.response.pay.RefundResponse;
 import com.xinput.wechat.response.pay.SandboxSignKeyResponse;
@@ -82,7 +87,7 @@ public class WechatPayApi {
         // 验证签名是否合法
         if (params.containsKey("sign")
                 && !WechatPayUtils.isSignatureValid(params, SignTypeEnum.getSignType(unifiedOrderRequest.getSign_type()))) {
-            throw new WechatException(String.format("Invalid sign value in query order response : [%s]", JsonUtils.toJsonString(response, true)));
+            throw new WechatException(String.format("Invalid sign value in unified order response : [%s]", JsonUtils.toJsonString(response, true)));
         }
 
         if (!response.isSuccess()) {
@@ -131,16 +136,116 @@ public class WechatPayApi {
     public static OrderQueryResponse orderQuery(OrderQueryRequest orderQueryRequest) throws Exception {
         String result = WechatHttpUtils.withoutCertQequest(getDomain() + PayUrlEnum.ORDER_QUERY.getUrl(), orderQueryRequest);
         Map<String, Object> params = WechatXmlUtils.toMap(result);
+        return createOrderQueryResponse(params, SignTypeEnum.getSignType(orderQueryRequest.getSign_type()));
+    }
+
+    /**
+     * 关闭订单
+     *
+     * @param outTradeNo 商户订单号
+     */
+    public static CloseOrderResponse closeOrder(String outTradeNo) throws Exception {
+        CloseOrderRequest closeOrderRequest = BuilderUtils.of(CloseOrderRequest::new)
+                .with(CloseOrderRequest::setOut_trade_no, outTradeNo)
+                .build();
+
+        return closeOrder(closeOrderRequest);
+    }
+
+    /**
+     * 关闭订单
+     */
+    public static CloseOrderResponse closeOrder(CloseOrderRequest closeOrderRequest) throws Exception {
+        String result = WechatHttpUtils.withoutCertQequest(getDomain() + PayUrlEnum.CLOSE_ORDER.getUrl(), closeOrderRequest);
+        Map<String, Object> params = WechatXmlUtils.toMap(result);
+        CloseOrderResponse closeOrderResponse = BeanMapUtils.toBean(params, CloseOrderResponse.class);
+        // 验证签名是否合法
+        if (params.containsKey("sign")
+                && !WechatPayUtils.isSignatureValid(params, SignTypeEnum.getSignType(closeOrderRequest.getSign_type()))) {
+            throw new WechatException(String.format("Invalid sign value in close order response : [%s]", JsonUtils.toJsonString(closeOrderResponse, true)));
+        }
+
+        return closeOrderResponse;
+    }
+
+    /**
+     * 申请退款
+     *
+     * @param outTradeNo 商户订单号
+     * @param totalFee   订单金额
+     * @param refundFee  退款金额
+     */
+    public static RefundResponse refund(String outTradeNo, Integer totalFee, Integer refundFee) throws Exception {
+        RefundRequest request = BuilderUtils.of(RefundRequest::new)
+                .with(RefundRequest::setOut_trade_no, outTradeNo)
+                .with(RefundRequest::setTotal_fee, totalFee)
+                .with(RefundRequest::setRefund_fee, refundFee)
+                .build();
+
+        return refund(request);
+    }
+
+    /**
+     * 申请退款
+     *
+     * @param refundRequest 申请退款请求
+     */
+    public static RefundResponse refund(RefundRequest refundRequest) throws Exception {
+        Integer totalFee = refundRequest.getTotal_fee();
+        if (totalFee == null || totalFee <= 0) {
+            throw new WechatException(String.format("账单总金额错误,请输入正确的账单总金额. total_fee:[%s]", totalFee));
+        }
+
+        Integer refundFee = refundRequest.getRefund_fee();
+        if (refundFee == null || refundFee <= 0) {
+            throw new WechatException(String.format("退款金额错误,请输入正确的退款金额. refund_fee:[%s]", refundFee));
+        }
+
+        if (totalFee < refundFee) {
+            throw new WechatException(String.format("退款金额不能大于账单总金额,请检查. total_fee:[%s], refund_fee:[%s]", totalFee, refundFee));
+        }
+
+        if (StringUtils.isNullOrEmpty(refundRequest.getOut_refund_no())) {
+            refundRequest.setOut_refund_no(ObjectId.stringId());
+        }
+
+        if (StringUtils.isNullOrEmpty(refundRequest.getNotify_url())) {
+            refundRequest.setNotify_url(WechatConfig.getWechatNotifyUrl());
+        }
+
+        String result = WechatHttpUtils.withCertPost(getDomain() + PayUrlEnum.REFUND.getUrl(), refundRequest);
+        Map<String, Object> params = WechatXmlUtils.toMap(result);
+
+        return createRefundResponse(params, SignTypeEnum.getSignType(refundRequest.getSign_type()));
+    }
+
+
+    /**
+     * 查询退款
+     */
+    public static RefundQueryResponse refundQuery(RefundQueryRequest refundQueryRequest) throws Exception {
+        String result = WechatHttpUtils.withoutCertQequest(getDomain() + PayUrlEnum.REFUND_QUERY.getUrl(), refundQueryRequest);
+        Map<String, Object> params = WechatXmlUtils.toMap(result);
+        return createRefundQueryResponse(params, SignTypeEnum.getSignType(refundQueryRequest.getSign_type()));
+    }
+
+    /**
+     * 下载交易账单
+     */
+    public static void downloadBill(DownloadBillRequest downloadBillRequest) throws Exception {
+        String result = WechatHttpUtils.withoutCertQequest(getDomain() + PayUrlEnum.DOWNLOAD_BILL.getUrl(), downloadBillRequest);
+        System.out.println(result);
+    }
+
+    // ============= 验证返回数据合法性，组装数据  ===========
+
+    private static OrderQueryResponse createOrderQueryResponse(Map<String, Object> params, SignTypeEnum signTypeEnum) throws Exception {
         OrderQueryResponse response = BeanMapUtils.toBean(params, OrderQueryResponse.class);
 
         // 验证签名是否合法
         if (params.containsKey("sign")
-                && !WechatPayUtils.isSignatureValid(params, SignTypeEnum.getSignType(orderQueryRequest.getSign_type()))) {
+                && !WechatPayUtils.isSignatureValid(params, signTypeEnum)) {
             throw new WechatException(String.format("Invalid sign value in query order response : [%s]", JsonUtils.toJsonString(response, true)));
-        }
-
-        if (!response.isSuccess()) {
-            return response;
         }
 
         Integer couponCount = response.getCoupon_count();
@@ -165,36 +270,84 @@ public class WechatPayApi {
         return response;
     }
 
-    /**
-     * 关闭订单 - 不需要证书
-     */
-    public static CloseOrderResponse closeOrder(CloseOrderRequest closeOrderRequest) throws Exception {
-        String result = WechatHttpUtils.withoutCertQequest(getDomain() + PayUrlEnum.CLOSE_ORDER.getUrl(), closeOrderRequest);
-        return XmlUtils.toBean(result, CloseOrderResponse.class);
+    private static RefundResponse createRefundResponse(Map<String, Object> params, SignTypeEnum signTypeEnum) throws Exception {
+        RefundResponse refundResponse = BeanMapUtils.toBean(params, RefundResponse.class);
+        // 验证签名是否合法
+        if (params.containsKey("sign")
+                && !WechatPayUtils.isSignatureValid(params, signTypeEnum)) {
+            throw new WechatException(String.format("Invalid sign value in close order response : [%s]", JsonUtils.toJsonString(refundResponse, true)));
+        }
+
+        Integer couponRefundCount = refundResponse.getCoupon_refund_count();
+        if (couponRefundCount == null || couponRefundCount < 1) {
+            return refundResponse;
+        }
+
+        // 对于微信支付返回的带有下标的 _0,_1,_2 类型参数进行封装
+        List<RefundCoupon> refundCoupons = Lists.newArrayListWithCapacity(couponRefundCount);
+        for (int i = 0; i < couponRefundCount; i++) {
+            RefundCoupon refundCoupon = BuilderUtils.of(RefundCoupon::new)
+                    .with(RefundCoupon::setIndex, i)
+                    .with(RefundCoupon::setCoupon_refund_id, String.valueOf(params.get("coupon_refund_id_" + i)))
+                    .with(RefundCoupon::setCoupon_type, String.valueOf(params.get("coupon_type_" + i)))
+                    .with(RefundCoupon::setCoupon_refund_fee, Integer.valueOf(String.valueOf(params.get("coupon_refund_fee_" + i))))
+                    .build();
+            refundCoupons.add(refundCoupon);
+        }
+        refundResponse.setRefundCoupons(refundCoupons);
+
+        return refundResponse;
     }
 
-    /**
-     * 申请退款 - 需要证书
-     */
-    public static RefundResponse refund(RefundRequest refundRequest) throws Exception {
-        String result = WechatHttpUtils.withCertPost(getDomain() + PayUrlEnum.REFUND.getUrl(), refundRequest);
-        return XmlUtils.toBean(result, RefundResponse.class);
-    }
+    private static RefundQueryResponse createRefundQueryResponse(Map<String, Object> params, SignTypeEnum signTypeEnum) throws Exception {
+        RefundQueryResponse refundQueryResponse = BeanMapUtils.toBean(params, RefundQueryResponse.class);
 
-    /**
-     * 查询退款 - 不需要证书
-     */
-    public static RefundQueryResponse refundQuery(RefundQueryRequest refundQueryRequest) throws Exception {
-        String result = WechatHttpUtils.withoutCertQequest(getDomain() + PayUrlEnum.REFUND_QUERY.getUrl(), refundQueryRequest);
-        return XmlUtils.toBean(result, RefundQueryResponse.class);
-    }
+        // 验证签名是否合法
+        if (params.containsKey("sign")
+                && !WechatPayUtils.isSignatureValid(params, signTypeEnum)) {
+            throw new WechatException(String.format("Invalid sign value in WechatPayApi.refundQuery response : [%s]", JsonUtils.toJsonString(refundQueryResponse, true)));
+        }
 
-    /**
-     * 下载交易账单
-     */
-    public static void downloadBill(DownloadBillRequest downloadBillRequest) throws Exception {
-        String result = WechatHttpUtils.withoutCertQequest(getDomain() + PayUrlEnum.DOWNLOAD_BILL.getUrl(), downloadBillRequest);
-        System.out.println(result);
-    }
+        Integer refundCount = refundQueryResponse.getRefund_count();
+        if (refundCount == null || refundCount < 1) {
+            return refundQueryResponse;
+        }
 
+        // 对于微信支付返回的带有下标的 _0,_1,_2 类型参数进行封装
+        List<QueryRefund> queryRefunds = Lists.newArrayListWithCapacity(refundCount);
+        for (int i = 0; i < refundCount; i++) {
+            Integer couponRefundCount = Integer.valueOf(String.valueOf(params.get("coupon_refund_count_" + i)));
+            QueryRefund refundCoupon = BuilderUtils.of(QueryRefund::new)
+                    .with(QueryRefund::setIndex, i)
+                    .with(QueryRefund::setRefund_id, String.valueOf(params.get("refund_id_" + i)))
+                    .with(QueryRefund::setRefund_status, String.valueOf(params.get("refund_status_" + i)))
+                    .with(QueryRefund::setCoupon_refund_fee, Integer.valueOf(String.valueOf(params.get("coupon_refund_fee_" + i))))
+                    .with(QueryRefund::setRefund_fee, Integer.valueOf(String.valueOf(params.get("refund_fee_" + i))))
+                    .with(QueryRefund::setSettlement_refund_fee, Integer.valueOf(String.valueOf(params.get("settlement_refund_fee_" + i))))
+                    .with(QueryRefund::setRefund_recv_accout, String.valueOf(params.get("refund_recv_accout_" + i)))
+                    .with(QueryRefund::setRefund_channel, String.valueOf(params.get("refund_channel_" + i)))
+                    .with(QueryRefund::setOut_refund_no, String.valueOf(params.get("out_refund_no_" + i)))
+                    .with(QueryRefund::setCoupon_refund_count, couponRefundCount)
+                    .build();
+            if (couponRefundCount > 0) {
+                List<QueryRefundDetail> details = Lists.newArrayListWithCapacity(couponRefundCount);
+                for (int k = 0; k < couponRefundCount; k++) {
+                    String suffixKey = i + "_" + k;
+                    QueryRefundDetail detail = BuilderUtils.of(QueryRefundDetail::new)
+                            .with(QueryRefundDetail::setDetailIndex, k)
+                            .with(QueryRefundDetail::setCoupon_refund_id, String.valueOf(params.get("refund_channel_" + suffixKey)))
+                            .with(QueryRefundDetail::setCoupon_type, String.valueOf(params.get("coupon_type_" + suffixKey)))
+                            .with(QueryRefundDetail::setCoupon_refund_fee, Integer.valueOf(String.valueOf(params.get("coupon_refund_fee_" + suffixKey))))
+                            .build();
+                    details.add(detail);
+                }
+                refundCoupon.setQueryRefundDetails(details);
+            }
+
+            queryRefunds.add(refundCoupon);
+        }
+        refundQueryResponse.setQueryRefunds(queryRefunds);
+
+        return refundQueryResponse;
+    }
 }

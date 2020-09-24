@@ -12,15 +12,15 @@ public enum PayUrlEnum {
 
     MICROPAY("/pay/micropay", "付款码付款"),
 
-    UNIFIED_ORDER("/pay/unifiedorder", "统一下单"),
+    UNIFIED_ORDER("/pay/unifiedorder", "统一下单(不需要证书)"),
 
     ORDER_QUERY("/pay/orderquery", "查询订单(不需要证书)"),
 
-    CLOSE_ORDER("/pay/closeorder", "关闭订单"),
+    CLOSE_ORDER("/pay/closeorder", "关闭订单(不需要证书)"),
 
-    REFUND("/secapi/pay/refund", "申请退款"),
+    REFUND("/secapi/pay/refund", "申请退款(需要证书)"),
 
-    REFUND_QUERY("/pay/refundquery", "查询退款"),
+    REFUND_QUERY("/pay/refundquery", "查询退款(不需要证书)"),
 
     DOWNLOAD_BILL("/pay/downloadbill", "下载交易账单"),
 

@@ -26,7 +26,7 @@ public class DownloadBillRequest extends BaseWeChatPayReq {
      * 必填: 否
      * 类型: String(8)
      * 示例值: ALL
-     * 描述: {@link com.xinput.wechatpay.consts.BillTypeEnum}
+     * 描述: {@link com.xinput.wechat.enums.BillTypeEnum}
      */
     @XStreamAlias("bill_type")
     private String bill_type;

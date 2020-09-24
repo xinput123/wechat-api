@@ -8,6 +8,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  * @author <a href="mailto:xinput.xx@gmail.com">xinput</a>
  * @date 2020-09-17 23:37
  */
+@XStreamAlias("xml")
 public class RefundRequest extends BaseWeChatPayReq {
 
     /**

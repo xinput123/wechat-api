@@ -3,6 +3,8 @@ package com.xinput.wechat.response.pay;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.xinput.bleach.util.StringUtils;
 
+import java.util.List;
+
 /**
  * 申请退款响应值
  *
@@ -13,6 +15,36 @@ import com.xinput.bleach.util.StringUtils;
 public class RefundResponse extends BaseWeChatPayResp {
 
     // 以下字段在return_code为SUCCESS的时候有返回
+
+    /**
+     * 交易类型
+     * 必填: 是
+     * 类型: String(16)
+     * 示例值: JSAPI
+     * 描述: {@link com.xinput.wechat.enums.TradeTypeEnum}
+     */
+    @XStreamAlias("trade_type")
+    private String trade_type;
+
+    /**
+     * 设备号
+     * 必填: 否
+     * 类型: String(32)
+     * 示例值: 013467007045764
+     * 描述: 自定义参数，可以为终端设备号(门店号或收银设备ID)，PC网页或公众号内支付可以传"WEB"
+     */
+    @XStreamAlias("device_info")
+    private String device_info;
+
+    /**
+     * 用户标识
+     * 必填: 是
+     * 类型: String(128)
+     * 示例值: Y
+     * 描述: 用户在商户appid 下的唯一标识
+     */
+    @XStreamAlias("openid")
+    private String openid;
 
     /**
      * 微信订单号
@@ -63,6 +95,15 @@ public class RefundResponse extends BaseWeChatPayResp {
      */
     @XStreamAlias("refund_fee")
     private Integer refund_fee;
+
+    /**
+     * 现金退款类型
+     * 必填: 否
+     * 类型: String
+     * 示例值: CNY
+     */
+    @XStreamAlias("refund_fee_type")
+    private String refund_fee_type;
 
     /**
      * 应结退款金额
@@ -122,7 +163,7 @@ public class RefundResponse extends BaseWeChatPayResp {
      * 描述: 货币类型，符合ISO 4217标准的三位字母代码，默认人民币：CNY
      */
     @XStreamAlias("cash_fee_type")
-    private Integer cash_fee_type;
+    private String cash_fee_type;
 
     /**
      * 现金退款金额
@@ -135,17 +176,34 @@ public class RefundResponse extends BaseWeChatPayResp {
     private Integer cash_refund_fee;
 
     /**
-     * 代金券类型
+     * 现金退款金额
      * 必填: 否
-     * 类型: String(8)
-     * 示例值: CASH
-     * 描述: CASH--充值代金券
-     * NO_CASH---非充值优惠券
-     * <p>
-     * 开通免充值券功能，并且订单使用了优惠券后有返回（取值：CASH、NO_CASH）。$n为下标,从0开始编号，举例：coupon_type_$0
+     * 类型: String
+     * 示例值: CNY
      */
-    @XStreamAlias("coupon_type_$n")
-    private String coupon_type_$n;
+    @XStreamAlias("cash_refund_fee_type")
+    private String cash_refund_fee_type;
+
+    /**
+     * 付款银行
+     * 必填: 是
+     * 类型: String(16)
+     * 示例值: CMC
+     * 描述: 银行类型，采用字符串类型的银行标识
+     * {@link com.xinput.wechat.enums.BankEnum}
+     */
+    @XStreamAlias("bank_type")
+    private String bank_type;
+
+    /**
+     * 错误信息
+     * 必填: 否
+     * 类型: String(128)
+     * 示例值: SUCCESS
+     * 描述: 错误信息描述
+     */
+    @XStreamAlias("err_msg")
+    private String err_msg;
 
     /**
      * 代金券退款总金额
@@ -158,16 +216,6 @@ public class RefundResponse extends BaseWeChatPayResp {
     private Integer coupon_refund_fee;
 
     /**
-     * 单个代金券退款金额
-     * 必填: 否
-     * 类型: Integer
-     * 示例值: 100
-     * 描述: 代金券退款金额<=退款金额，退款金额-代金券或立减优惠退款金额为现金
-     */
-    @XStreamAlias("coupon_refund_fee_$n")
-    private Integer coupon_refund_fee_$n;
-
-    /**
      * 退款代金券使用数量
      * 必填: 否
      * 类型: Integer
@@ -178,14 +226,9 @@ public class RefundResponse extends BaseWeChatPayResp {
     private Integer coupon_refund_count;
 
     /**
-     * 退款代金券ID
-     * 必填: 否
-     * 类型: String(20)
-     * 示例值: 10000
-     * 描述: 退款代金券ID, $n为下标，从0开始编号
+     * 退还代金券数据
      */
-    @XStreamAlias("coupon_refund_id_$n")
-    private Integer coupon_refund_id_$n;
+    private List<RefundCoupon> refundCoupons;
 
     public String getTransaction_id() {
         return transaction_id;
@@ -267,11 +310,11 @@ public class RefundResponse extends BaseWeChatPayResp {
         this.cash_fee = cash_fee;
     }
 
-    public Integer getCash_fee_type() {
+    public String getCash_fee_type() {
         return cash_fee_type;
     }
 
-    public void setCash_fee_type(Integer cash_fee_type) {
+    public void setCash_fee_type(String cash_fee_type) {
         this.cash_fee_type = cash_fee_type;
     }
 
@@ -283,28 +326,12 @@ public class RefundResponse extends BaseWeChatPayResp {
         this.cash_refund_fee = cash_refund_fee;
     }
 
-    public String getCoupon_type_$n() {
-        return coupon_type_$n;
-    }
-
-    public void setCoupon_type_$n(String coupon_type_$n) {
-        this.coupon_type_$n = coupon_type_$n;
-    }
-
     public Integer getCoupon_refund_fee() {
         return coupon_refund_fee;
     }
 
     public void setCoupon_refund_fee(Integer coupon_refund_fee) {
         this.coupon_refund_fee = coupon_refund_fee;
-    }
-
-    public Integer getCoupon_refund_fee_$n() {
-        return coupon_refund_fee_$n;
-    }
-
-    public void setCoupon_refund_fee_$n(Integer coupon_refund_fee_$n) {
-        this.coupon_refund_fee_$n = coupon_refund_fee_$n;
     }
 
     public Integer getCoupon_refund_count() {
@@ -315,12 +342,68 @@ public class RefundResponse extends BaseWeChatPayResp {
         this.coupon_refund_count = coupon_refund_count;
     }
 
-    public Integer getCoupon_refund_id_$n() {
-        return coupon_refund_id_$n;
+    public String getDevice_info() {
+        return device_info;
     }
 
-    public void setCoupon_refund_id_$n(Integer coupon_refund_id_$n) {
-        this.coupon_refund_id_$n = coupon_refund_id_$n;
+    public void setDevice_info(String device_info) {
+        this.device_info = device_info;
+    }
+
+    public String getOpenid() {
+        return openid;
+    }
+
+    public void setOpenid(String openid) {
+        this.openid = openid;
+    }
+
+    public String getRefund_fee_type() {
+        return refund_fee_type;
+    }
+
+    public void setRefund_fee_type(String refund_fee_type) {
+        this.refund_fee_type = refund_fee_type;
+    }
+
+    public String getCash_refund_fee_type() {
+        return cash_refund_fee_type;
+    }
+
+    public void setCash_refund_fee_type(String cash_refund_fee_type) {
+        this.cash_refund_fee_type = cash_refund_fee_type;
+    }
+
+    public String getBank_type() {
+        return bank_type;
+    }
+
+    public void setBank_type(String bank_type) {
+        this.bank_type = bank_type;
+    }
+
+    public String getErr_msg() {
+        return err_msg;
+    }
+
+    public void setErr_msg(String err_msg) {
+        this.err_msg = err_msg;
+    }
+
+    public String getTrade_type() {
+        return trade_type;
+    }
+
+    public void setTrade_type(String trade_type) {
+        this.trade_type = trade_type;
+    }
+
+    public List<RefundCoupon> getRefundCoupons() {
+        return refundCoupons;
+    }
+
+    public void setRefundCoupons(List<RefundCoupon> refundCoupons) {
+        this.refundCoupons = refundCoupons;
     }
 
     @Override
