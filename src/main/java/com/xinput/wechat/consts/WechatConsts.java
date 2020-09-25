@@ -42,9 +42,14 @@ public class WechatConsts {
     public static final String WECHAT_API_CERT_PATH = "wechat.api.cert.path";
 
     /**
-     * 通知回调地址
+     * 通知回调地址 - 下单
      */
-    public static final String WECHAT_NOTIFY_URL = "wechat.notify.url";
+    public static final String WECHAT_NOTIFY_UNIFIEDORDER_URL = "wechat.notify.unifiedorder.url";
+
+    /**
+     * 通知回调地址 - 退款
+     */
+    public static final String WECHAT_NOTIFY_REFUND_URL_ = "wechat.notify.refund.url";
 
     /**
      * 是否使用沙箱环境

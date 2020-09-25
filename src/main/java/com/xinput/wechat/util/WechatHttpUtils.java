@@ -116,18 +116,12 @@ public final class WechatHttpUtils {
 
         httpPost.addHeader("Content-Type", "text/xml");
         httpPost.setEntity(new StringEntity(data, "UTF-8"));
-        String result;
-        try {
-            HttpResponse httpResponse = httpClient.execute(httpPost);
-            logger.info("request url:[{}], response code: [{}].", url, httpResponse.getStatusLine().getStatusCode());
-            HttpEntity httpEntity = httpResponse.getEntity();
-            result = EntityUtils.toString(httpEntity, "UTF-8");
-            if (WechatConfig.getUseSandbox()) {
-                logger.info("request url:[{}],\n request data : [{}],\n response result:[{}].", url, data, result);
-            }
-        } catch (Exception e) {
-            logger.error("request url:[{}] exception.", url, e);
-            throw e;
+        HttpResponse httpResponse = httpClient.execute(httpPost);
+        logger.info("request url:[{}], response code: [{}].", url, httpResponse.getStatusLine().getStatusCode());
+        HttpEntity httpEntity = httpResponse.getEntity();
+        String result = EntityUtils.toString(httpEntity, "UTF-8");
+        if (WechatConfig.getUseSandbox()) {
+            logger.info("request url:[{}],\n request data : [{}],\n response result:[{}].", url, data, result);
         }
         return result;
     }

@@ -1,4 +1,4 @@
-package com.xinput.wechat.model;
+package com.xinput.wechat.result;
 
 import com.xinput.bleach.util.ObjectId;
 import com.xinput.bleach.util.SecureUtils;

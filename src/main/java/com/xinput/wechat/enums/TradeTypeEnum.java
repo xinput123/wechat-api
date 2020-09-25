@@ -20,4 +20,12 @@ public enum TradeTypeEnum {
         this.tradeType = tradeType;
         this.desc = desc;
     }
+
+    public String getTradeType() {
+        return tradeType;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
 }

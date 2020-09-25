@@ -5,7 +5,6 @@ import com.xinput.bleach.util.JsonUtils;
 import com.xinput.bleach.util.Logs;
 import com.xinput.bleach.util.ObjectId;
 import com.xinput.wechat.config.WechatConfig;
-import com.xinput.wechat.model.OrderSignature;
 import com.xinput.wechat.request.pay.CloseOrderRequest;
 import com.xinput.wechat.request.pay.DownloadBillRequest;
 import com.xinput.wechat.request.pay.OrderQueryRequest;
@@ -17,6 +16,7 @@ import com.xinput.wechat.response.pay.OrderQueryResponse;
 import com.xinput.wechat.response.pay.RefundQueryResponse;
 import com.xinput.wechat.response.pay.RefundResponse;
 import com.xinput.wechat.response.pay.UnifiedOrderResponse;
+import com.xinput.wechat.result.OrderSignature;
 import org.junit.Test;
 import org.slf4j.Logger;
 
@@ -48,7 +48,7 @@ public class WechatPayApiDemo {
                 // 支付金额，这边需要转成字符串类型，否则后面的签名会失败
                 .with(UnifiedOrderRequest::setTotal_fee, 102)
                 // 支付成功后的回调地址
-                .with(UnifiedOrderRequest::setNotify_url, WechatConfig.getWechatNotifyUrl())
+                .with(UnifiedOrderRequest::setNotify_url, WechatConfig.getWechatNotifyRefundUrl())
                 // 支付方式
                 .with(UnifiedOrderRequest::setTrade_type, "JSAPI")
                 // 用户的openID，自己获取
@@ -171,7 +171,7 @@ public class WechatPayApiDemo {
                 .with(RefundRequest::setOut_refund_no, out_refund_no)
                 .with(RefundRequest::setTotal_fee, 502)
                 .with(RefundRequest::setRefund_fee, 502)
-                .with(RefundRequest::setNotify_url, WechatConfig.getWechatNotifyUrl())
+                .with(RefundRequest::setNotify_url, WechatConfig.getWechatNotifyRefundUrl())
                 .build();
         logger.info("申请退款数据 : {}", JsonUtils.toJsonString(request, true));
         try {

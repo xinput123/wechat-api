@@ -1,16 +1,16 @@
-package com.xinput.wechat;
+package com.xinput.wechat.testcase;
 
 import com.xinput.bleach.util.BuilderUtils;
 import com.xinput.bleach.util.JsonUtils;
 import com.xinput.bleach.util.Logs;
 import com.xinput.bleach.util.ObjectId;
-import com.xinput.wechat.config.WechatConfig;
-import com.xinput.wechat.model.OrderSignature;
+import com.xinput.wechat.WechatPayApi;
 import com.xinput.wechat.request.pay.RefundQueryRequest;
 import com.xinput.wechat.request.pay.UnifiedOrderRequest;
 import com.xinput.wechat.response.pay.RefundQueryResponse;
 import com.xinput.wechat.response.pay.RefundResponse;
 import com.xinput.wechat.response.pay.UnifiedOrderResponse;
+import com.xinput.wechat.result.OrderSignature;
 import org.junit.Test;
 import org.slf4j.Logger;
 
@@ -25,7 +25,7 @@ import org.slf4j.Logger;
  * （3）根据商户内部单号（out_trade_no），调用退款 api 进行退款；
  * （4）根据商户内部单号（out_trade_no），调用退款查询 api 查询退款结果。
  */
-public class Pay3_4 {
+public class Case3_4 {
 
     private static final Logger logger = Logs.get();
 
@@ -54,8 +54,6 @@ public class Pay3_4 {
                 .with(UnifiedOrderRequest::setOut_trade_no, outTradeNo)
                 // 支付金额，这边需要转成字符串类型，否则后面的签名会失败
                 .with(UnifiedOrderRequest::setTotal_fee, 552)
-                // 支付成功后的回调地址
-                .with(UnifiedOrderRequest::setNotify_url, WechatConfig.getWechatNotifyUrl())
                 // 支付方式
                 .with(UnifiedOrderRequest::setTrade_type, "JSAPI")
                 // 用户的openID，自己获取
@@ -90,6 +88,7 @@ public class Pay3_4 {
     public void refundquery(String outTradeNo) {
         RefundQueryRequest request = BuilderUtils.of(RefundQueryRequest::new)
                 .with(RefundQueryRequest::setOut_trade_no, outTradeNo)
+                .with(RefundQueryRequest::setOffset, 10)
                 .build();
         logger.info("查询退款:{}.", JsonUtils.toJsonString(request));
 

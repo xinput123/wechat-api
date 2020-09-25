@@ -11,6 +11,7 @@ import com.xinput.bleach.util.bean.BeanMapUtils;
 import com.xinput.wechat.config.WechatConfig;
 import com.xinput.wechat.enums.PayUrlEnum;
 import com.xinput.wechat.enums.SignTypeEnum;
+import com.xinput.wechat.enums.TradeTypeEnum;
 import com.xinput.wechat.exception.WechatException;
 import com.xinput.wechat.request.pay.CloseOrderRequest;
 import com.xinput.wechat.request.pay.DownloadBillRequest;
@@ -31,6 +32,10 @@ import com.xinput.wechat.response.pay.RefundQueryResponse;
 import com.xinput.wechat.response.pay.RefundResponse;
 import com.xinput.wechat.response.pay.SandboxSignKeyResponse;
 import com.xinput.wechat.response.pay.UnifiedOrderResponse;
+import com.xinput.wechat.result.BillCount;
+import com.xinput.wechat.result.WechatBillInfo;
+import com.xinput.wechat.result.WechatPayBillResult;
+import com.xinput.wechat.util.CsvUtils;
 import com.xinput.wechat.util.WechatHttpUtils;
 import com.xinput.wechat.util.WechatPayUtils;
 import com.xinput.wechat.util.WechatXmlUtils;
@@ -73,13 +78,46 @@ public class WechatPayApi {
     }
 
     /**
-     * 统一下单 - 不需要证书
+     * 统一下单
+     *
+     * @param tradeTypeEnum 支付方式
+     * @param openId        用户openID
+     * @param deviceInfo    设备名称
+     * @param outTradeNo    商户订单号
+     * @param body          商品名称
+     * @param ip            获取客户端的ip地址
+     * @param totalFee      支付金额
+     * @param notifyUrl     回调地址
+     */
+    public static UnifiedOrderResponse unifiedOrder(TradeTypeEnum tradeTypeEnum, String openId, String deviceInfo,
+                                                    String outTradeNo, String body, String ip, Integer totalFee,
+                                                    String notifyUrl) throws Exception {
+        UnifiedOrderRequest request = BuilderUtils.of(UnifiedOrderRequest::new)
+                .with(UnifiedOrderRequest::setBody, body)
+                .with(UnifiedOrderRequest::setSpbill_create_ip, ip)
+                .with(UnifiedOrderRequest::setOut_trade_no, outTradeNo)
+                .with(UnifiedOrderRequest::setTotal_fee, totalFee)
+                .with(UnifiedOrderRequest::setNotify_url, notifyUrl)
+                .with(UnifiedOrderRequest::setTrade_type, tradeTypeEnum.getTradeType())
+                .with(UnifiedOrderRequest::setOpenid, openId)
+                .with(UnifiedOrderRequest::setDevice_info, deviceInfo)
+                .build();
+
+        return unifiedOrder(request);
+    }
+
+    /**
+     * 统一下单
      *
      * @param unifiedOrderRequest
      * @return
      * @throws Exception
      */
     public static UnifiedOrderResponse unifiedOrder(UnifiedOrderRequest unifiedOrderRequest) throws Exception {
+        if (StringUtils.isNullOrEmpty(unifiedOrderRequest.getNotify_url())) {
+            unifiedOrderRequest.setNotify_url(WechatConfig.getWechatNotifyUnifiedOrderUrl());
+        }
+
         String result = WechatHttpUtils.withoutCertQequest(getDomain() + PayUrlEnum.UNIFIED_ORDER.getUrl(), unifiedOrderRequest);
         Map<String, Object> params = WechatXmlUtils.toMap(result);
         UnifiedOrderResponse response = BeanMapUtils.toBean(params, UnifiedOrderResponse.class);
@@ -88,10 +126,6 @@ public class WechatPayApi {
         if (params.containsKey("sign")
                 && !WechatPayUtils.isSignatureValid(params, SignTypeEnum.getSignType(unifiedOrderRequest.getSign_type()))) {
             throw new WechatException(String.format("Invalid sign value in unified order response : [%s]", JsonUtils.toJsonString(response, true)));
-        }
-
-        if (!response.isSuccess()) {
-            return response;
         }
 
         return response;
@@ -210,7 +244,7 @@ public class WechatPayApi {
         }
 
         if (StringUtils.isNullOrEmpty(refundRequest.getNotify_url())) {
-            refundRequest.setNotify_url(WechatConfig.getWechatNotifyUrl());
+            refundRequest.setNotify_url(WechatConfig.getWechatNotifyRefundUrl());
         }
 
         String result = WechatHttpUtils.withCertPost(getDomain() + PayUrlEnum.REFUND.getUrl(), refundRequest);
@@ -219,6 +253,58 @@ public class WechatPayApi {
         return createRefundResponse(params, SignTypeEnum.getSignType(refundRequest.getSign_type()));
     }
 
+    /**
+     * 查询退款
+     *
+     * @param transactionId 微信订单号
+     */
+    public static RefundQueryResponse refundQueryByTransaction(String transactionId) throws Exception {
+        RefundQueryRequest request = BuilderUtils.of(RefundQueryRequest::new)
+                .with(RefundQueryRequest::setTransaction_id, transactionId)
+                .build();
+
+        return refundQuery(request);
+    }
+
+    /**
+     * 查询退款
+     *
+     * @param outTradeNo 商户订单号
+     */
+    public static RefundQueryResponse refundQueryByOutTradeNo(String outTradeNo) throws Exception {
+        RefundQueryRequest request = BuilderUtils.of(RefundQueryRequest::new)
+                .with(RefundQueryRequest::setOut_trade_no, outTradeNo)
+                .build();
+
+        return refundQuery(request);
+    }
+
+
+    /**
+     * 查询退款
+     *
+     * @param outRefundNo 商户退款单号
+     */
+    public static RefundQueryResponse refundQueryByOutRefundNo(String outRefundNo) throws Exception {
+        RefundQueryRequest request = BuilderUtils.of(RefundQueryRequest::new)
+                .with(RefundQueryRequest::setOut_refund_no, outRefundNo)
+                .build();
+
+        return refundQuery(request);
+    }
+
+    /**
+     * 查询退款
+     *
+     * @param refundId 微信退款单号
+     */
+    public static RefundQueryResponse refundQueryByRefund(String refundId) throws Exception {
+        RefundQueryRequest request = BuilderUtils.of(RefundQueryRequest::new)
+                .with(RefundQueryRequest::setRefund_id, refundId)
+                .build();
+
+        return refundQuery(request);
+    }
 
     /**
      * 查询退款
@@ -232,9 +318,26 @@ public class WechatPayApi {
     /**
      * 下载交易账单
      */
-    public static void downloadBill(DownloadBillRequest downloadBillRequest) throws Exception {
-        String result = WechatHttpUtils.withoutCertQequest(getDomain() + PayUrlEnum.DOWNLOAD_BILL.getUrl(), downloadBillRequest);
-        System.out.println(result);
+    public static String downloadBillContent(DownloadBillRequest downloadBillRequest) throws Exception {
+        return WechatHttpUtils.withoutCertQequest(getDomain() + PayUrlEnum.DOWNLOAD_BILL.getUrl(), downloadBillRequest).replaceAll("`", "");
+    }
+
+    /**
+     * 下载交易账单
+     */
+    public static WechatPayBillResult downloadBill(DownloadBillRequest downloadBillRequest) throws Exception {
+        String result = WechatHttpUtils.withoutCertQequest(getDomain() + PayUrlEnum.DOWNLOAD_BILL.getUrl(), downloadBillRequest).replaceAll("`", "");
+        System.out.println("\n\n\n");
+//        System.out.println("result : " + result);
+        // 微信总共返回的数据条数，包括表头
+        List<BillCount> billCounts = CsvUtils.readCsv(result, BillCount.class);
+        int billCount = Integer.parseInt(billCounts.get(billCounts.size() - 1).getTotalRecord());
+        List<WechatPayBillResult> wechatPayBillResults = CsvUtils.readCsv(result, billCount + 2, WechatPayBillResult.class);
+        WechatPayBillResult wechatPayBillResult = wechatPayBillResults.get(0);
+
+        List<WechatBillInfo> wechatBillInfos = CsvUtils.readCsv(result, 1, billCount - 3, WechatBillInfo.class);
+        wechatPayBillResult.setWechatBillInfos(wechatBillInfos);
+        return wechatPayBillResult;
     }
 
     // ============= 验证返回数据合法性，组装数据  ===========

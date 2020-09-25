@@ -13,7 +13,9 @@ public enum BillTypeEnum {
     // 返回当日成功支付的订单（不含充值退款订单）
     SUCCESS("SUCCESS"),
     // 返回当日退款订单（不含充值退款订单）
-    REFUND("REFUND");
+    REFUND("REFUND"),
+    // 返回当日充值退款订单
+    RECHARGE_REFUND("RECHARGE_REFUND");
 
     private String billType;
 

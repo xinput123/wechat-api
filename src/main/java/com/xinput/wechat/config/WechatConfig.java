@@ -59,9 +59,14 @@ public class WechatConfig {
     private static Integer wechatTimeout;
 
     /**
-     * 微信支付通知回调
+     * 微信支付通知回调 - 下单
      */
-    private static String wechatNotifyUrl;
+    private static String wechatNotifyUnifiedOrderUrl;
+
+    /**
+     * 微信支付通知回调 - 退款
+     */
+    private static String wechatNotifyRefundUrl;
 
     /**
      * 是否使用沙箱环境，默认是，如果想使用正式环境，设置 wechat.use.sandbox=false 即可
@@ -120,14 +125,22 @@ public class WechatConfig {
         return useSandbox;
     }
 
-    public static String getWechatNotifyUrl() {
-        if (StringUtils.isNullOrEmpty(wechatNotifyUrl)) {
-            wechatNotifyUrl = get(WechatConsts.WECHAT_NOTIFY_URL);
+    public static String getWechatNotifyUnifiedOrderUrl() {
+        if (StringUtils.isNullOrEmpty(wechatNotifyUnifiedOrderUrl)) {
+            wechatNotifyUnifiedOrderUrl = get(WechatConsts.WECHAT_NOTIFY_UNIFIEDORDER_URL);
         }
 
-        return wechatNotifyUrl;
+        return wechatNotifyUnifiedOrderUrl;
     }
 
+
+    public static String getWechatNotifyRefundUrl() {
+        if (StringUtils.isNullOrEmpty(wechatNotifyRefundUrl)) {
+            wechatNotifyRefundUrl = get(WechatConsts.WECHAT_NOTIFY_REFUND_URL_);
+        }
+
+        return wechatNotifyRefundUrl;
+    }
 
     /**
      * 获取自定义key对应的value,如果不存在，使用默认值 defaultValue

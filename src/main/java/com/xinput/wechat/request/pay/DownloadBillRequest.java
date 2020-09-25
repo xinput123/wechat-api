@@ -39,7 +39,7 @@ public class DownloadBillRequest extends BaseWeChatPayReq {
      * 描述: 非必传参数，固定值：GZIP，返回格式为.gzip的压缩包账单。不传则默认为数据流形式
      */
     @XStreamAlias("tar_type")
-    private String tar_type;
+    private String tar_type = "GZIP";
 
     public String getBill_date() {
         return bill_date;
