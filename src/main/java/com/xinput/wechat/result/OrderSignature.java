@@ -4,7 +4,7 @@ import com.xinput.bleach.util.ObjectId;
 import com.xinput.bleach.util.SecureUtils;
 import com.xinput.wechat.config.WechatConfig;
 import com.xinput.wechat.enums.SignTypeEnum;
-import com.xinput.wechat.response.pay.UnifiedOrderResponse;
+import com.xinput.wechat.response.UnifiedOrderResponse;
 
 /**
  * 统一下单后数据签名

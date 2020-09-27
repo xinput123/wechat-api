@@ -6,9 +6,9 @@ import com.xinput.bleach.util.Logs;
 import com.xinput.bleach.util.ObjectId;
 import com.xinput.wechat.WechatPayApi;
 import com.xinput.wechat.config.WechatConfig;
-import com.xinput.wechat.request.pay.UnifiedOrderRequest;
-import com.xinput.wechat.response.pay.OrderQueryResponse;
-import com.xinput.wechat.response.pay.UnifiedOrderResponse;
+import com.xinput.wechat.request.UnifiedOrderRequest;
+import com.xinput.wechat.response.OrderQueryResponse;
+import com.xinput.wechat.response.UnifiedOrderResponse;
 import com.xinput.wechat.result.OrderSignature;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -53,7 +53,6 @@ public class Case3_3 {
                 .with(UnifiedOrderRequest::setBody, "嘉云升-测试用例3.3:551")
                 // 获取客户端的ip地址
                 .with(UnifiedOrderRequest::setSpbill_create_ip, "192.168.10.13")
-                .with(UnifiedOrderRequest::setSign_type, "MD5")
                 // 商户订单号,自己的订单ID
                 .with(UnifiedOrderRequest::setOut_trade_no, outTradeNo)
                 // 支付金额，这边需要转成字符串类型，否则后面的签名会失败

@@ -1,4 +1,4 @@
-package com.xinput.wechat.response.pay;
+package com.xinput.wechat.response;
 
 /**
  * @author <a href="mailto:xinput.xx@gmail.com">xinput</a>

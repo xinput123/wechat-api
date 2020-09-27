@@ -1,4 +1,4 @@
-package com.xinput.wechat.response.pay;
+package com.xinput.wechat.response;
 
 import java.util.List;
 

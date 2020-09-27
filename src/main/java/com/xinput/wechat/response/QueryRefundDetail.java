@@ -1,4 +1,4 @@
-package com.xinput.wechat.response.pay;
+package com.xinput.wechat.response;
 
 /**
  * 退款代金券明细

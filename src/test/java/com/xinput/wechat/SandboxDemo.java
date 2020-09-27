@@ -5,10 +5,10 @@ import com.xinput.bleach.util.JsonUtils;
 import com.xinput.bleach.util.ObjectId;
 import com.xinput.wechat.config.WechatConfig;
 import com.xinput.wechat.enums.SignTypeEnum;
-import com.xinput.wechat.request.pay.MicroPayRequest;
-import com.xinput.wechat.request.pay.SandboxSignKeyRequest;
-import com.xinput.wechat.response.pay.MicroPayResponse;
-import com.xinput.wechat.response.pay.SandboxSignKeyResponse;
+import com.xinput.wechat.request.MicroPayRequest;
+import com.xinput.wechat.request.SandboxSignKeyRequest;
+import com.xinput.wechat.response.MicroPayResponse;
+import com.xinput.wechat.response.SandboxSignKeyResponse;
 import org.junit.Test;
 
 /**

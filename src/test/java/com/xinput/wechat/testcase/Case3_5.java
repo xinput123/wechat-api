@@ -5,7 +5,7 @@ import com.xinput.bleach.util.FileHelper;
 import com.xinput.bleach.util.JsonUtils;
 import com.xinput.wechat.WechatPayApi;
 import com.xinput.wechat.enums.BillTypeEnum;
-import com.xinput.wechat.request.pay.DownloadBillRequest;
+import com.xinput.wechat.request.DownloadBillRequest;
 import com.xinput.wechat.result.WechatBillInfo;
 import com.xinput.wechat.result.WechatPayBillResult;
 import org.junit.Test;

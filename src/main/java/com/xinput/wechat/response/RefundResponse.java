@@ -1,4 +1,4 @@
-package com.xinput.wechat.response.pay;
+package com.xinput.wechat.response;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.xinput.bleach.util.StringUtils;

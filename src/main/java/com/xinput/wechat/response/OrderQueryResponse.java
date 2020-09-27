@@ -1,18 +1,21 @@
-package com.xinput.wechat.response.pay;
+package com.xinput.wechat.response;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.xinput.bleach.util.StringUtils;
 
+import java.util.List;
+
 /**
- * 付款码支付返回值
+ * 查询订单返回值
  *
  * @author <a href="mailto:xinput.xx@gmail.com">xinput</a>
- * @date 2020-09-14 10:55
+ * @date 2020-09-17 20:01
  */
 @XStreamAlias("xml")
-public class MicroPayResponse extends BaseWeChatPayResp {
+public class OrderQueryResponse extends BaseWeChatPayResp {
 
-    // 以下字段在return_code为SUCCESS的时候有返回
+    // 以下字段在return_code 、result_code、trade_state都为SUCCESS时有返回 ，
+    // 如trade_state不为 SUCCESS，则只返回out_trade_no（必传）和attach（选传）
     /**
      * 设备号
      * 必填: 否
@@ -23,15 +26,12 @@ public class MicroPayResponse extends BaseWeChatPayResp {
     @XStreamAlias("device_info")
     private String device_info;
 
-
-    // 以下字段在return_code 和result_code都为SUCCESS的时候有返回
-
     /**
      * 用户标识
      * 必填: 是
      * 类型: String(128)
-     * 示例值: Y
-     * 描述: 用户在商户appid 下的唯一标识
+     * 示例值: oUpF8uMuAJO_M2pxb1Q9zNjWeS6o
+     * 描述: 用户在商户appid下的唯一标识
      */
     @XStreamAlias("openid")
     private String openid;
@@ -41,20 +41,41 @@ public class MicroPayResponse extends BaseWeChatPayResp {
      * 必填: 是
      * 类型: String(1)
      * 示例值: Y
-     * 描述: 用户是否关注公众账号，仅在公众账号类型支付有效，取值范围：Y或N;Y-关注;N-未关注
+     * 描述: 用户是否关注公众账号，Y-关注，N-未关注
      */
     @XStreamAlias("is_subscribe")
     private String is_subscribe;
 
     /**
+     * 子商户号
+     * 必填: 否
+     * 类型: String(32)
+     * 示例值: Y
+     * 描述: 子商户号
+     */
+    @XStreamAlias("sub_mch_id")
+    private String sub_mch_id;
+
+    /**
      * 交易类型
      * 必填: 是
      * 类型: String(16)
-     * 示例值: MICROPAY
-     * 描述: MICROPAY 付款码支付
+     * 示例值: JSAPI
+     * 描述: 小程序取值如下：JSAPI
+     * https://pay.weixin.qq.com/wiki/doc/api/wxa/wxa_api.php?chapter=4_2
      */
     @XStreamAlias("trade_type")
     private String trade_type;
+
+    /**
+     * 交易状态
+     * 必填: 是
+     * 类型: String(32)
+     * 示例值: SUCCESS
+     * 描述: {@link com.xinput.wechat.enums.TradeStateEnum}
+     */
+    @XStreamAlias("trade_state")
+    private String trade_state;
 
     /**
      * 付款银行
@@ -66,16 +87,6 @@ public class MicroPayResponse extends BaseWeChatPayResp {
      */
     @XStreamAlias("bank_type")
     private String bank_type;
-
-    /**
-     * 标价币种
-     * 必填: 否
-     * 类型: String(8)
-     * 示例值: CNY
-     * 描述: 货币类型，符合ISO 4217标准的三位字母代码，默认人民币：CNY
-     */
-    @XStreamAlias("fee_type")
-    private String fee_type;
 
     /**
      * 标价金额
@@ -98,24 +109,14 @@ public class MicroPayResponse extends BaseWeChatPayResp {
     private Integer settlement_total_fee;
 
     /**
-     * 代金券金额
+     * 标价币种
      * 必填: 否
-     * 类型: Integer
-     * 示例值: 100
-     * 描述: “代金券”金额<=订单金额，订单金额-“代金券”金额=现金支付金额
-     */
-    @XStreamAlias("coupon_fee")
-    private Integer coupon_fee;
-
-    /**
-     * 现金支付币种
-     * 必填: 否
-     * 类型: String(16)
+     * 类型: String(8)
      * 示例值: CNY
      * 描述: 货币类型，符合ISO 4217标准的三位字母代码，默认人民币：CNY
      */
-    @XStreamAlias("cash_fee_type")
-    private String cash_fee_type;
+    @XStreamAlias("fee_type")
+    private String fee_type;
 
     /**
      * 现金支付金额
@@ -128,7 +129,39 @@ public class MicroPayResponse extends BaseWeChatPayResp {
     private Integer cash_fee;
 
     /**
-     * 微信订单号
+     * 现金支付币种
+     * 必填: 否
+     * 类型: String(16)
+     * 示例值: CNY
+     * 描述: 货币类型，符合ISO 4217标准的三位字母代码，默认人民币：CNY
+     */
+    @XStreamAlias("cash_fee_type")
+    private String cash_fee_type;
+
+    /**
+     * 代金券金额
+     * 必填: 否
+     * 类型: Integer
+     * 示例值: 100
+     * 描述: “代金券”金额<=订单金额，订单金额-“代金券”金额=现金支付金额
+     */
+    @XStreamAlias("coupon_fee")
+    private Integer coupon_fee;
+
+    /**
+     * 代金券使用数量
+     * 必填: 否
+     * 类型: Integer
+     * 示例值: 1
+     * 描述: 代金券使用数量
+     */
+    @XStreamAlias("coupon_count")
+    private Integer coupon_count;
+
+    private List<Coupon> coupons;
+
+    /**
+     * 微信支付单号
      * 必填: 是
      * 类型: String(32)
      * 示例值: 1009660380201506130728806387
@@ -141,18 +174,18 @@ public class MicroPayResponse extends BaseWeChatPayResp {
      * 商户订单号
      * 必填: 是
      * 类型: String(32)
-     * 示例值: 33368018
+     * 示例值: 20150806125346
      * 描述: 商户系统内部订单号，要求32个字符内，只能是数字、大小写字母_-|*@ ，且在同一个商户号下唯一
      */
     @XStreamAlias("out_trade_no")
     private String out_trade_no;
 
     /**
-     * 商家数据包
+     * 附加数据
      * 必填: 否
      * 类型: String(128)
-     * 示例值: 123456
-     * 描述: 商家数据包，原样返回
+     * 示例值: 深圳分店
+     * 描述: 附加数据，原样返回
      */
     @XStreamAlias("attach")
     private String attach;
@@ -168,15 +201,14 @@ public class MicroPayResponse extends BaseWeChatPayResp {
     private String time_end;
 
     /**
-     * 营销详情
-     * 必填: 否
-     * 类型: String(6000)
-     * 示例值: 20141030133525
-     * 描述: 新增返回，单品优惠功能字段
-     * https://pay.weixin.qq.com/wiki/doc/api/danpin.php?chapter=9_101&index=1
+     * 交易状态描述
+     * 必填: 是
+     * 类型: String(256)
+     * 示例值: 支付失败，请重新下单支付
+     * 描述: 对当前查询订单状态的描述和下一步操作的指引
      */
-    @XStreamAlias("promotion_detail")
-    private String promotion_detail;
+    @XStreamAlias("trade_state_desc")
+    private String trade_state_desc;
 
     public String getDevice_info() {
         return device_info;
@@ -210,20 +242,20 @@ public class MicroPayResponse extends BaseWeChatPayResp {
         this.trade_type = trade_type;
     }
 
+    public String getTrade_state() {
+        return trade_state;
+    }
+
+    public void setTrade_state(String trade_state) {
+        this.trade_state = trade_state;
+    }
+
     public String getBank_type() {
         return bank_type;
     }
 
     public void setBank_type(String bank_type) {
         this.bank_type = bank_type;
-    }
-
-    public String getFee_type() {
-        return fee_type;
-    }
-
-    public void setFee_type(String fee_type) {
-        this.fee_type = fee_type;
     }
 
     public Integer getTotal_fee() {
@@ -242,12 +274,20 @@ public class MicroPayResponse extends BaseWeChatPayResp {
         this.settlement_total_fee = settlement_total_fee;
     }
 
-    public Integer getCoupon_fee() {
-        return coupon_fee;
+    public String getFee_type() {
+        return fee_type;
     }
 
-    public void setCoupon_fee(Integer coupon_fee) {
-        this.coupon_fee = coupon_fee;
+    public void setFee_type(String fee_type) {
+        this.fee_type = fee_type;
+    }
+
+    public Integer getCash_fee() {
+        return cash_fee;
+    }
+
+    public void setCash_fee(Integer cash_fee) {
+        this.cash_fee = cash_fee;
     }
 
     public String getCash_fee_type() {
@@ -258,12 +298,28 @@ public class MicroPayResponse extends BaseWeChatPayResp {
         this.cash_fee_type = cash_fee_type;
     }
 
-    public Integer getCash_fee() {
-        return cash_fee;
+    public Integer getCoupon_fee() {
+        return coupon_fee;
     }
 
-    public void setCash_fee(Integer cash_fee) {
-        this.cash_fee = cash_fee;
+    public void setCoupon_fee(Integer coupon_fee) {
+        this.coupon_fee = coupon_fee;
+    }
+
+    public Integer getCoupon_count() {
+        return coupon_count;
+    }
+
+    public void setCoupon_count(Integer coupon_count) {
+        this.coupon_count = coupon_count;
+    }
+
+    public List<Coupon> getCoupons() {
+        return coupons;
+    }
+
+    public void setCoupons(List<Coupon> coupons) {
+        this.coupons = coupons;
     }
 
     public String getTransaction_id() {
@@ -298,18 +354,26 @@ public class MicroPayResponse extends BaseWeChatPayResp {
         this.time_end = time_end;
     }
 
-    public String getPromotion_detail() {
-        return promotion_detail;
+    public String getTrade_state_desc() {
+        return trade_state_desc;
     }
 
-    public void setPromotion_detail(String promotion_detail) {
-        this.promotion_detail = promotion_detail;
+    public void setTrade_state_desc(String trade_state_desc) {
+        this.trade_state_desc = trade_state_desc;
+    }
+
+    public String getSub_mch_id() {
+        return sub_mch_id;
+    }
+
+    public void setSub_mch_id(String sub_mch_id) {
+        this.sub_mch_id = sub_mch_id;
     }
 
     @Override
     public boolean isSuccess() {
         if (StringUtils.equalsIgnoreCase("SUCCESS", this.getReturn_code())
-                && StringUtils.equalsIgnoreCase("SUCCESS", this.getResult_code())) {
+                && StringUtils.equalsIgnoreCase("SUCCESS", this.getTrade_state())) {
             return true;
         }
         return false;

@@ -7,7 +7,7 @@ import com.xinput.bleach.util.bean.BeanMapUtils;
 import com.xinput.wechat.config.WechatConfig;
 import com.xinput.wechat.enums.SignTypeEnum;
 import com.xinput.wechat.exception.WechatException;
-import com.xinput.wechat.request.pay.BaseWeChatPayReq;
+import com.xinput.wechat.request.BaseWeChatPayReq;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;

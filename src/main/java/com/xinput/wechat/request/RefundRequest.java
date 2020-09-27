@@ -1,4 +1,4 @@
-package com.xinput.wechat.request.pay;
+package com.xinput.wechat.request;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 

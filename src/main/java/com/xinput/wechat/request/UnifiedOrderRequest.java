@@ -1,27 +1,17 @@
-package com.xinput.wechat.request.pay;
+package com.xinput.wechat.request;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
 import com.xinput.bleach.util.xml.XStreamCDataConverter;
 
 /**
- * 付款码支付 - 不需要证书
- * <p>
- * 收银员使用扫码设备读取微信用户付款码以后，二维码或条码信息会传送至商户收银台，由商户收银台或者商户后台调用该接口发起支付。
- * <p>
- * 提醒1：提交支付请求后微信会同步返回支付结果。当返回结果为“系统错误”时，商户系统等待5秒后调用【查询订单API】，查
- * 询支付实际交易结果；当返回结果为“USERPAYING”时，商户系统可设置间隔时间(建议10秒)重新查询支付结果，直到支付成功或
- * 超时(建议30秒)；
- * <p>
- * 提醒2：在调用查询接口返回后，如果交易状况不明晰，请调用【撤销订单API】，此时如果交易失败则关闭订单，该单不能再支付
- * 成功；如果交易成功，则将扣款退回到用户账户。当撤销无返回或错误时，请再次调用。注意：请勿扣款后立即调用【撤销订
- * 单API】,建议至少15秒后再调用。撤销订单API需要双向证书。
+ * 统一下单 - 不需要证书
  *
  * @author <a href="mailto:xinput.xx@gmail.com">xinput</a>
  * @date 2020-09-14 10:55
  */
 @XStreamAlias("xml")
-public class MicroPayRequest extends BaseWeChatPayReq {
+public class UnifiedOrderRequest extends BaseWeChatPayReq {
 
     /**
      * 设备号
@@ -76,16 +66,6 @@ public class MicroPayRequest extends BaseWeChatPayReq {
     private String out_trade_no;
 
     /**
-     * 标价金额
-     * 必填: 是
-     * 类型: Integer
-     * 示例值: 88
-     * 描述: 订单总金额，单位为分
-     */
-    @XStreamAlias("total_fee")
-    private Integer total_fee;
-
-    /**
      * 标价币种
      * 必填: 否
      * 类型: String(32)
@@ -96,6 +76,16 @@ public class MicroPayRequest extends BaseWeChatPayReq {
     private String fee_type;
 
     /**
+     * 标价金额
+     * 必填: 是
+     * 类型: Integer
+     * 示例值: 88
+     * 描述: 订单总金额，单位为分
+     */
+    @XStreamAlias("total_fee")
+    private Integer total_fee;
+
+    /**
      * 终端IP
      * 必填: 是
      * 类型: String(64)
@@ -104,26 +94,6 @@ public class MicroPayRequest extends BaseWeChatPayReq {
      */
     @XStreamAlias("spbill_create_ip")
     private String spbill_create_ip;
-
-    /**
-     * 订单优惠标记
-     * 必填: 否
-     * 类型: String(32)
-     * 示例值: WXG
-     * 描述: 订单优惠标记，使用代金券或立减优惠功能时需要的参数
-     */
-    @XStreamAlias("goods_tag")
-    private String goods_tag;
-
-    /**
-     * 指定支付方式
-     * 必填: 否
-     * 类型: String(32)
-     * 示例值: no_credit
-     * 描述: 上传此参数no_credit--可限制用户不能使用信用卡支付
-     */
-    @XStreamAlias("limit_pay")
-    private String limit_pay;
 
     /**
      * 交易起始时间
@@ -149,6 +119,66 @@ public class MicroPayRequest extends BaseWeChatPayReq {
     private String time_expire;
 
     /**
+     * 订单优惠标记
+     * 必填: 否
+     * 类型: String(32)
+     * 示例值: WXG
+     * 描述: 订单优惠标记，使用代金券或立减优惠功能时需要的参数
+     */
+    @XStreamAlias("goods_tag")
+    private String goods_tag;
+
+    /**
+     * 通知地址
+     * 必填: 是
+     * 类型: String(256)
+     * 示例值: http://www.weixin.qq.com/wxpay/pay.php
+     * 描述: 异步接收微信支付结果通知的回调地址，通知url必须为外网可访问的url，不能携带参数。
+     */
+    @XStreamAlias("notify_url")
+    private String notify_url;
+
+    /**
+     * 交易类型
+     * 必填: 是
+     * 类型: String(16)
+     * 示例值: JSAPI
+     * 描述: 小程序取值如下：JSAPI。 https://pay.weixin.qq.com/wiki/doc/api/wxa/wxa_api.php?chapter=4_2
+     */
+    @XStreamAlias("trade_type")
+    private String trade_type;
+
+    /**
+     * 商品ID
+     * 必填: 否
+     * 类型: String(16)
+     * 示例值: 12235413214070356458058
+     * 描述:
+     */
+    @XStreamAlias("product_id")
+    private String product_id;
+
+    /**
+     * 指定支付方式
+     * 必填: 否
+     * 类型: String(32)
+     * 示例值: no_credit
+     * 描述: 上传此参数no_credit--可限制用户不能使用信用卡支付
+     */
+    @XStreamAlias("limit_pay")
+    private String limit_pay;
+
+    /**
+     * 用户标识
+     * 必填: 否
+     * 类型: String(128)
+     * 示例值: oUpF8uMuAJO_M2pxb1Q9zNjWeS6o
+     * 描述: trade_type=JSAPI，此参数必传，用户在商户appid下的唯一标识
+     */
+    @XStreamAlias("openid")
+    private String openid;
+
+    /**
      * 电子发票入口开放标识
      * 必填: 否
      * 类型: String(8)
@@ -157,17 +187,6 @@ public class MicroPayRequest extends BaseWeChatPayReq {
      */
     @XStreamAlias("receipt")
     private String receipt;
-
-    /**
-     * 付款码
-     * 必填: 是
-     * 类型: String(128)
-     * 示例值: 120061098828009406
-     * 描述: 扫码支付付款码，设备读取用户微信中的条码或者二维码信息
-     * （注：用户付款码条形码规则：18位纯数字，以10、11、12、13、14、15开头）
-     */
-    @XStreamAlias("auth_code")
-    private String auth_code;
 
 //    /**
 //     * 场景信息
@@ -219,14 +238,6 @@ public class MicroPayRequest extends BaseWeChatPayReq {
         this.out_trade_no = out_trade_no;
     }
 
-    public Integer getTotal_fee() {
-        return total_fee;
-    }
-
-    public void setTotal_fee(Integer total_fee) {
-        this.total_fee = total_fee;
-    }
-
     public String getFee_type() {
         return fee_type;
     }
@@ -235,28 +246,20 @@ public class MicroPayRequest extends BaseWeChatPayReq {
         this.fee_type = fee_type;
     }
 
+    public Integer getTotal_fee() {
+        return total_fee;
+    }
+
+    public void setTotal_fee(Integer total_fee) {
+        this.total_fee = total_fee;
+    }
+
     public String getSpbill_create_ip() {
         return spbill_create_ip;
     }
 
     public void setSpbill_create_ip(String spbill_create_ip) {
         this.spbill_create_ip = spbill_create_ip;
-    }
-
-    public String getGoods_tag() {
-        return goods_tag;
-    }
-
-    public void setGoods_tag(String goods_tag) {
-        this.goods_tag = goods_tag;
-    }
-
-    public String getLimit_pay() {
-        return limit_pay;
-    }
-
-    public void setLimit_pay(String limit_pay) {
-        this.limit_pay = limit_pay;
     }
 
     public String getTime_start() {
@@ -275,6 +278,54 @@ public class MicroPayRequest extends BaseWeChatPayReq {
         this.time_expire = time_expire;
     }
 
+    public String getGoods_tag() {
+        return goods_tag;
+    }
+
+    public void setGoods_tag(String goods_tag) {
+        this.goods_tag = goods_tag;
+    }
+
+    public String getNotify_url() {
+        return notify_url;
+    }
+
+    public void setNotify_url(String notify_url) {
+        this.notify_url = notify_url;
+    }
+
+    public String getTrade_type() {
+        return trade_type;
+    }
+
+    public void setTrade_type(String trade_type) {
+        this.trade_type = trade_type;
+    }
+
+    public String getProduct_id() {
+        return product_id;
+    }
+
+    public void setProduct_id(String product_id) {
+        this.product_id = product_id;
+    }
+
+    public String getLimit_pay() {
+        return limit_pay;
+    }
+
+    public void setLimit_pay(String limit_pay) {
+        this.limit_pay = limit_pay;
+    }
+
+    public String getOpenid() {
+        return openid;
+    }
+
+    public void setOpenid(String openid) {
+        this.openid = openid;
+    }
+
     public String getReceipt() {
         return receipt;
     }
@@ -283,11 +334,28 @@ public class MicroPayRequest extends BaseWeChatPayReq {
         this.receipt = receipt;
     }
 
-    public String getAuth_code() {
-        return auth_code;
-    }
+    @Override
+    public String toString() {
 
-    public void setAuth_code(String auth_code) {
-        this.auth_code = auth_code;
+        return "UnifiedOrderRequest{" +
+                super.toString() + '\'' +
+                ", device_info='" + device_info + '\'' +
+                ", body='" + body + '\'' +
+                ", detail='" + detail + '\'' +
+                ", attach='" + attach + '\'' +
+                ", out_trade_no='" + out_trade_no + '\'' +
+                ", fee_type='" + fee_type + '\'' +
+                ", total_fee=" + total_fee +
+                ", spbill_create_ip='" + spbill_create_ip + '\'' +
+                ", time_start='" + time_start + '\'' +
+                ", time_expire='" + time_expire + '\'' +
+                ", goods_tag='" + goods_tag + '\'' +
+                ", notify_url='" + notify_url + '\'' +
+                ", trade_type='" + trade_type + '\'' +
+                ", product_id='" + product_id + '\'' +
+                ", limit_pay='" + limit_pay + '\'' +
+                ", openid='" + openid + '\'' +
+                ", receipt='" + receipt + '\'' +
+                '}';
     }
 }
