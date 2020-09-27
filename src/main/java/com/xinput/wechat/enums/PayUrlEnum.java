@@ -28,7 +28,7 @@ public enum PayUrlEnum {
 
     PAYITIL_REPORT("/payitil/report", "交易保障"),
 
-    BILL_COMMENT("/billcommentsp/batchquerycomment", "拉取订单评价数据");
+    QUERY_COMMENT("/billcommentsp/batchquerycomment", "拉取订单评价数据");
 
     private String url;
 

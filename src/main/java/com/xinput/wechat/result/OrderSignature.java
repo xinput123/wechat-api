@@ -33,12 +33,12 @@ public class OrderSignature {
         this.appId = response.getAppid();
         this.nonceStr = ObjectId.stringId();
         this.prepayId = response.getPrepay_id();
-        this.signType = WechatConfig.getUseSandbox() ? SignTypeEnum.MD5.getType() : SignTypeEnum.HMACSHA256.getType();
+        this.signType = SignTypeEnum.getAllowSign().getType();
 
         String stringSignTemp = "appId=" + this.appId
                 + "&nonceStr=" + this.nonceStr
                 + "&package=prepay_id=" + this.prepayId
-                + "&signType=" + (WechatConfig.getUseSandbox() ? SignTypeEnum.MD5.getType() : SignTypeEnum.HMACSHA256.getType())
+                + "&signType=" + (SignTypeEnum.getAllowSign().getType())
                 + "&timeStamp=" + timeStamp
                 + "&key=" + WechatConfig.getWechatApiKey();
 

@@ -4,6 +4,7 @@ import com.xinput.bleach.util.BuilderUtils;
 import com.xinput.bleach.util.FileHelper;
 import com.xinput.bleach.util.JsonUtils;
 import com.xinput.wechat.WechatPayApi;
+import com.xinput.wechat.enums.BillTypeEnum;
 import com.xinput.wechat.request.pay.DownloadBillRequest;
 import com.xinput.wechat.result.WechatBillInfo;
 import com.xinput.wechat.result.WechatPayBillResult;
@@ -28,6 +29,42 @@ public class Case3_5 {
         WechatPayBillResult result = WechatPayApi.downloadBill(downloadBillRequest);
 
         System.out.println(JsonUtils.toJsonString(result));
+    }
+
+    @Test
+    public void downloadAll() throws Exception {
+        DownloadBillRequest downloadBillRequest = BuilderUtils.of(DownloadBillRequest::new)
+                .with(DownloadBillRequest::setBill_type, "ALL")
+                .build();
+        String result = WechatPayApi.downloadBillContent(downloadBillRequest);
+        System.out.println(result);
+    }
+
+    @Test
+    public void downloadSuccess() throws Exception {
+        DownloadBillRequest downloadBillRequest = BuilderUtils.of(DownloadBillRequest::new)
+                .with(DownloadBillRequest::setBill_type, BillTypeEnum.SUCCESS.getBillType())
+                .build();
+        String result = WechatPayApi.downloadBillContent(downloadBillRequest);
+        System.out.println(result);
+    }
+
+    @Test
+    public void downloadRefund() throws Exception {
+        DownloadBillRequest downloadBillRequest = BuilderUtils.of(DownloadBillRequest::new)
+                .with(DownloadBillRequest::setBill_type, BillTypeEnum.REFUND.getBillType())
+                .build();
+        String result = WechatPayApi.downloadBillContent(downloadBillRequest);
+        System.out.println(result);
+    }
+
+    @Test
+    public void downloadRechargeRefund() throws Exception {
+        DownloadBillRequest downloadBillRequest = BuilderUtils.of(DownloadBillRequest::new)
+                .with(DownloadBillRequest::setBill_type, BillTypeEnum.RECHARGE_REFUND.getBillType())
+                .build();
+        String result = WechatPayApi.downloadBillContent(downloadBillRequest);
+        System.out.println(result);
     }
 
     @Test

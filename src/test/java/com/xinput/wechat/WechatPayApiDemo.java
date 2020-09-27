@@ -76,7 +76,7 @@ public class WechatPayApiDemo {
         String transaction_id = "4634523320920200923160408583947";
         String outTradeNo = "5f6996766b5adfaca6b0e21b";
         try {
-            OrderQueryResponse response = WechatPayApi.orderQuery(transaction_id, outTradeNo);
+            OrderQueryResponse response = WechatPayApi.orderQueryByTransaction(transaction_id);
             System.out.println(JsonUtils.toJsonString(response, true));
         } catch (Exception e) {
             e.printStackTrace();
@@ -98,7 +98,7 @@ public class WechatPayApiDemo {
 //        outTradeNo = "5f6b1e8e6b5adf4fc2ca1b0f"; // 用例7【公众-异常】订单金额1.34元，用户支付成功，微信支付通知关键信息不一致
 
         try {
-            OrderQueryResponse response = WechatPayApi.orderQuery(outTradeNo);
+            OrderQueryResponse response = WechatPayApi.orderQueryByOutTradeNo(outTradeNo);
             System.out.println(JsonUtils.toJsonString(response, true));
         } catch (Exception e) {
             e.printStackTrace();

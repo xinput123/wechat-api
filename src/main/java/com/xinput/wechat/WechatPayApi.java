@@ -9,14 +9,17 @@ import com.xinput.bleach.util.StringUtils;
 import com.xinput.bleach.util.XmlUtils;
 import com.xinput.bleach.util.bean.BeanMapUtils;
 import com.xinput.wechat.config.WechatConfig;
+import com.xinput.wechat.consts.WechatConsts;
 import com.xinput.wechat.enums.PayUrlEnum;
 import com.xinput.wechat.enums.SignTypeEnum;
 import com.xinput.wechat.enums.TradeTypeEnum;
 import com.xinput.wechat.exception.WechatException;
 import com.xinput.wechat.request.pay.CloseOrderRequest;
 import com.xinput.wechat.request.pay.DownloadBillRequest;
+import com.xinput.wechat.request.pay.DownloadFundflowRequest;
 import com.xinput.wechat.request.pay.MicroPayRequest;
 import com.xinput.wechat.request.pay.OrderQueryRequest;
+import com.xinput.wechat.request.pay.QueryCommentReq;
 import com.xinput.wechat.request.pay.RefundQueryRequest;
 import com.xinput.wechat.request.pay.RefundRequest;
 import com.xinput.wechat.request.pay.SandboxSignKeyRequest;
@@ -25,6 +28,7 @@ import com.xinput.wechat.response.pay.CloseOrderResponse;
 import com.xinput.wechat.response.pay.Coupon;
 import com.xinput.wechat.response.pay.MicroPayResponse;
 import com.xinput.wechat.response.pay.OrderQueryResponse;
+import com.xinput.wechat.response.pay.QueryCommentResp;
 import com.xinput.wechat.response.pay.QueryRefund;
 import com.xinput.wechat.response.pay.QueryRefundDetail;
 import com.xinput.wechat.response.pay.RefundCoupon;
@@ -34,6 +38,8 @@ import com.xinput.wechat.response.pay.SandboxSignKeyResponse;
 import com.xinput.wechat.response.pay.UnifiedOrderResponse;
 import com.xinput.wechat.result.BillCount;
 import com.xinput.wechat.result.WechatBillInfo;
+import com.xinput.wechat.result.WechatFundFlowBaseResult;
+import com.xinput.wechat.result.WechatFundFlowResult;
 import com.xinput.wechat.result.WechatPayBillResult;
 import com.xinput.wechat.util.CsvUtils;
 import com.xinput.wechat.util.WechatHttpUtils;
@@ -135,13 +141,11 @@ public class WechatPayApi {
      * 查询订单 - 根据微信订单号
      *
      * @param transactionId 微信订单号
-     * @param outTradeNo    商户订单号
      * @return
      */
-    public static OrderQueryResponse orderQuery(String transactionId, String outTradeNo) throws Exception {
+    public static OrderQueryResponse orderQueryByTransaction(String transactionId) throws Exception {
         OrderQueryRequest orderQueryRequest = BuilderUtils.of(OrderQueryRequest::new)
                 .with(OrderQueryRequest::setTransaction_id, transactionId)
-                .with(OrderQueryRequest::setOut_trade_no, outTradeNo)
                 .build();
 
         return orderQuery(orderQueryRequest);
@@ -153,7 +157,7 @@ public class WechatPayApi {
      * @param outTradeNo 商户订单号
      * @return
      */
-    public static OrderQueryResponse orderQuery(String outTradeNo) throws Exception {
+    public static OrderQueryResponse orderQueryByOutTradeNo(String outTradeNo) throws Exception {
         OrderQueryRequest orderQueryRequest = BuilderUtils.of(OrderQueryRequest::new)
                 .with(OrderQueryRequest::setOut_trade_no, outTradeNo)
                 .build();
@@ -327,8 +331,7 @@ public class WechatPayApi {
      */
     public static WechatPayBillResult downloadBill(DownloadBillRequest downloadBillRequest) throws Exception {
         String result = WechatHttpUtils.withoutCertQequest(getDomain() + PayUrlEnum.DOWNLOAD_BILL.getUrl(), downloadBillRequest).replaceAll("`", "");
-        System.out.println("\n\n\n");
-//        System.out.println("result : " + result);
+
         // 微信总共返回的数据条数，包括表头
         List<BillCount> billCounts = CsvUtils.readCsv(result, BillCount.class);
         int billCount = Integer.parseInt(billCounts.get(billCounts.size() - 1).getTotalRecord());
@@ -338,6 +341,48 @@ public class WechatPayApi {
         List<WechatBillInfo> wechatBillInfos = CsvUtils.readCsv(result, 1, billCount - 3, WechatBillInfo.class);
         wechatPayBillResult.setWechatBillInfos(wechatBillInfos);
         return wechatPayBillResult;
+    }
+
+    /**
+     * 下载资金账单
+     */
+    public static WechatFundFlowResult downloadFundflow(DownloadFundflowRequest request) throws Exception {
+        String result = WechatHttpUtils.withCertPost(
+                getDomain() + PayUrlEnum.DOWNLOAD_FUND_FLOW.getUrl(), request)
+                .replaceAll("`", StringUtils.EMPTY);
+        logger.info(result);
+        if (result.startsWith(WechatConsts.XML)) {
+            return XmlUtils.toBean(result, WechatFundFlowResult.class);
+        }
+
+        // 查看返回了多少条数据. 其中第一行为表头，倒数第二行为资金账单统计标题
+        String[] temp = result.split("\n");
+        int resultSize = temp.length;
+        temp = null; // only gc
+
+        if (resultSize < 4) {
+            return null;
+        }
+
+        List<WechatFundFlowResult> wechatFundFlowResults
+                = CsvUtils.readCsv(result, resultSize - 1, WechatFundFlowResult.class);
+        List<WechatFundFlowBaseResult> wechatFundFlowBaseResults
+                = CsvUtils.readCsv(result, 1, resultSize - 2, WechatFundFlowBaseResult.class);
+
+        WechatFundFlowResult fundFlowResult = wechatFundFlowResults.get(0);
+        fundFlowResult.setBaseResults(wechatFundFlowBaseResults);
+
+        return fundFlowResult;
+    }
+
+    /**
+     * 拉取订单评价数据
+     *
+     * @param req
+     */
+    public static QueryCommentResp qeuryComment(QueryCommentReq req) throws Exception {
+        String result = WechatHttpUtils.withCertPost(getDomain() + PayUrlEnum.QUERY_COMMENT.getUrl(), req);
+        return QueryCommentResp.fromXml(result);
     }
 
     // ============= 验证返回数据合法性，组装数据  ===========

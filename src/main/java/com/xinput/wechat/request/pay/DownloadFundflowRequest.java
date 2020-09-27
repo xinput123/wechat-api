@@ -27,10 +27,7 @@ public class DownloadFundflowRequest extends BaseWeChatPayReq {
      * 必填: 是
      * 类型: String(8)
      * 示例值: Basic
-     * 描述: 账单的资金来源账户：
-     * Basic  基本账户
-     * Operation 运营账户
-     * Fees 手续费账户
+     * 描述: 账单的资金来源账户 {@link com.xinput.wechat.enums.AccountTypeEnum}
      */
     @XStreamAlias("account_type")
     private String account_type;
@@ -69,13 +66,4 @@ public class DownloadFundflowRequest extends BaseWeChatPayReq {
         this.tar_type = tar_type;
     }
 
-    @Override
-    public String toString() {
-        return "DownloadFundflowRequest{" +
-                super.toString() + '\'' +
-                ", bill_date='" + bill_date + '\'' +
-                ", account_type='" + account_type + '\'' +
-                ", tar_type='" + tar_type + '\'' +
-                '}';
-    }
 }

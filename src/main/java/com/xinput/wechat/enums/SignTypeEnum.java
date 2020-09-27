@@ -46,16 +46,14 @@ public enum SignTypeEnum {
     /**
      * 获取有效的验证算法名称
      *
-     * @param signType
      * @return
      */
-    public static SignTypeEnum getAllowSign(String signType) {
-        SignTypeEnum signTypeEnum = getSignType(signType);
-        if (signType == null || WechatConfig.getUseSandbox()) {
+    public static SignTypeEnum getAllowSign() {
+        if (WechatConfig.getUseSandbox()) {
             return MD5;
         }
 
-        return signTypeEnum;
+        return HMACSHA256;
     }
 
 }

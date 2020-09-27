@@ -81,7 +81,7 @@ public class Case3_3 {
 
     public void orderQuery(String outTradeNo) {
         try {
-            OrderQueryResponse response = WechatPayApi.orderQuery(outTradeNo);
+            OrderQueryResponse response = WechatPayApi.orderQueryByOutTradeNo(outTradeNo);
             logger.info("查询订单结果:{}", JsonUtils.toJsonString(response, true));
         } catch (Exception e) {
             e.printStackTrace();

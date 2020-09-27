@@ -3,7 +3,7 @@ package com.xinput.wechat.config;
 import com.xinput.bleach.util.Logs;
 import com.xinput.bleach.util.SimpleProperties;
 import com.xinput.bleach.util.StringUtils;
-import com.xinput.wechat.consts.WechatConsts;
+import com.xinput.wechat.enums.WechatConfigEnum;
 import org.slf4j.Logger;
 
 /**
@@ -14,16 +14,19 @@ public class WechatConfig {
 
     private static final Logger logger = Logs.get();
 
-    public static SimpleProperties SP;
+    /**
+     * 默认配置文件名称
+     */
+    private static final String DEFAULT_CONFIG_FILE = "system.properties";
 
-    private static final String CONFIG_FILE = WechatConsts.DEFAULT_SYSTEM_FILE;
+    private static SimpleProperties SP;
 
     static {
         try {
-            SP = SimpleProperties.readConfiguration(CONFIG_FILE);
+            SP = SimpleProperties.readConfiguration(DEFAULT_CONFIG_FILE);
         } catch (Exception e) {
             SP = null;
-            logger.error("read file: [{}] exception.", CONFIG_FILE, e);
+            logger.error("read file: [{}] exception.", DEFAULT_CONFIG_FILE, e);
             throw e;
         }
     }
@@ -76,7 +79,7 @@ public class WechatConfig {
 
     public static String getWechatAppid() {
         if (StringUtils.isNullOrEmpty(wechatAppid)) {
-            wechatAppid = get(WechatConsts.WECHAT_APPID);
+            wechatAppid = get(WechatConfigEnum.WECHAT_APPID.getKey());
         }
 
         return wechatAppid;
@@ -84,42 +87,42 @@ public class WechatConfig {
 
     public static String getWechatSecret() {
         if (StringUtils.isNullOrEmpty(wechatSecret)) {
-            wechatSecret = get(WechatConsts.WECHAT_SECRET);
+            wechatSecret = get(WechatConfigEnum.WECHAT_SECRET.getKey());
         }
         return wechatSecret;
     }
 
     public static String getWechatApiKey() {
         if (StringUtils.isNullOrEmpty(wechatApiKey)) {
-            wechatApiKey = get(WechatConsts.WECHAT_API_KEY);
+            wechatApiKey = get(WechatConfigEnum.WECHAT_API_KEY.getKey());
         }
         return wechatApiKey;
     }
 
     public static String getWechatMchId() {
         if (StringUtils.isNullOrEmpty(wechatMchId)) {
-            wechatMchId = get(WechatConsts.WECHAT_MCH_ID);
+            wechatMchId = get(WechatConfigEnum.WECHAT_MCH_ID.getKey());
         }
         return wechatMchId;
     }
 
     public static String getWechatApiCertPath() {
         if (StringUtils.isNullOrEmpty(wechatApiCertPath)) {
-            wechatApiCertPath = get(WechatConsts.WECHAT_API_CERT_PATH);
+            wechatApiCertPath = get(WechatConfigEnum.WECHAT_API_CERT_PATH.getKey());
         }
         return wechatApiCertPath;
     }
 
     public static int getWechatTimeout() {
         if (wechatTimeout == null) {
-            wechatTimeout = SP.getIntProperty(WechatConsts.WECHAT_TIMEOUT, 5);
+            wechatTimeout = SP.getIntProperty(WechatConfigEnum.WECHAT_TIMEOUT.getKey(), 5);
         }
         return wechatTimeout;
     }
 
     public static boolean getUseSandbox() {
         if (null == useSandbox) {
-            useSandbox = SP.getBooleanProperty(WechatConsts.WECHAT_USE_SANDBOX, false);
+            useSandbox = SP.getBooleanProperty(WechatConfigEnum.WECHAT_USE_SANDBOX.getKey(), false);
         }
 
         return useSandbox;
@@ -127,7 +130,7 @@ public class WechatConfig {
 
     public static String getWechatNotifyUnifiedOrderUrl() {
         if (StringUtils.isNullOrEmpty(wechatNotifyUnifiedOrderUrl)) {
-            wechatNotifyUnifiedOrderUrl = get(WechatConsts.WECHAT_NOTIFY_UNIFIEDORDER_URL);
+            wechatNotifyUnifiedOrderUrl = get(WechatConfigEnum.WECHAT_NOTIFY_UNIFIEDORDER_URL.getKey());
         }
 
         return wechatNotifyUnifiedOrderUrl;
@@ -136,7 +139,7 @@ public class WechatConfig {
 
     public static String getWechatNotifyRefundUrl() {
         if (StringUtils.isNullOrEmpty(wechatNotifyRefundUrl)) {
-            wechatNotifyRefundUrl = get(WechatConsts.WECHAT_NOTIFY_REFUND_URL_);
+            wechatNotifyRefundUrl = get(WechatConfigEnum.WECHAT_NOTIFY_REFUND_URL.getKey());
         }
 
         return wechatNotifyRefundUrl;

@@ -57,7 +57,7 @@ public final class WechatHttpUtils {
 
     public static String post(String url, BaseWeChatPayReq baseReq, boolean useCert) throws Exception {
         // 设置有效的验证方式
-        SignTypeEnum signTypeEnum = SignTypeEnum.getAllowSign(baseReq.getSign_type());
+        SignTypeEnum signTypeEnum = SignTypeEnum.getAllowSign();
         baseReq.setSign_type(signTypeEnum.getType());
         logger.info("request url:[{}]. params:[{}]", url, JsonUtils.toJsonString(baseReq));
         baseReq.setAppid(WechatConfig.getWechatAppid());
