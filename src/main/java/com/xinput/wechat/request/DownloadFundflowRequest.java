@@ -10,7 +10,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  * @date 2020-09-17 23:37
  */
 @XStreamAlias("xml")
-public class DownloadFundflowRequest extends BaseWeChatPayReq {
+public class DownloadFundflowRequest extends BaseWeChatPayRequest {
 
     /**
      * 对账单日期

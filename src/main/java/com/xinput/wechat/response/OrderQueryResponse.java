@@ -1,9 +1,17 @@
 package com.xinput.wechat.response;
 
+import com.google.common.collect.Lists;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.xinput.bleach.util.BuilderUtils;
+import com.xinput.bleach.util.JsonUtils;
 import com.xinput.bleach.util.StringUtils;
+import com.xinput.bleach.util.bean.BeanMapUtils;
+import com.xinput.wechat.enums.SignTypeEnum;
+import com.xinput.wechat.exception.WechatException;
+import com.xinput.wechat.util.WechatPayUtils;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 查询订单返回值
@@ -12,7 +20,7 @@ import java.util.List;
  * @date 2020-09-17 20:01
  */
 @XStreamAlias("xml")
-public class OrderQueryResponse extends BaseWeChatPayResp {
+public class OrderQueryResponse extends BaseWeChatPayResponse {
 
     // 以下字段在return_code 、result_code、trade_state都为SUCCESS时有返回 ，
     // 如trade_state不为 SUCCESS，则只返回out_trade_no（必传）和attach（选传）
@@ -377,5 +385,36 @@ public class OrderQueryResponse extends BaseWeChatPayResp {
             return true;
         }
         return false;
+    }
+
+    public static OrderQueryResponse createOrderQueryResponse(Map<String, Object> params, SignTypeEnum signTypeEnum) throws Exception {
+        OrderQueryResponse response = BeanMapUtils.toBean(params, OrderQueryResponse.class);
+
+        // 验证签名是否合法
+        if (params.containsKey("sign")
+                && !WechatPayUtils.isSignatureValid(params, signTypeEnum)) {
+            throw new WechatException(String.format("Invalid sign value in query order response : [%s]", JsonUtils.toJsonString(response, true)));
+        }
+
+        Integer couponCount = response.getCoupon_count();
+        if (couponCount == null || couponCount < 1) {
+            return response;
+        }
+
+        // 对于微信支付返回的带有下标的 _0,_1,_2 类型参数进行封装
+        List<Coupon> coupons = Lists.newArrayListWithCapacity(couponCount);
+        for (int i = 0; i < couponCount; i++) {
+            Coupon coupon = BuilderUtils.of(Coupon::new)
+                    .with(Coupon::setIndex, i)
+                    .with(Coupon::setCoupon_id, String.valueOf(params.get("coupon_id_" + i)))
+                    .with(Coupon::setCoupon_type, String.valueOf(params.get("coupon_type_" + i)))
+                    .with(Coupon::setCoupon_fee, Integer.valueOf(String.valueOf(params.get("coupon_fee_" + i))))
+                    .with(Coupon::setCoupon_batch, String.valueOf(params.get("coupon_batch_id_" + i)))
+                    .build();
+            coupons.add(coupon);
+        }
+
+        response.setCoupons(coupons);
+        return response;
     }
 }

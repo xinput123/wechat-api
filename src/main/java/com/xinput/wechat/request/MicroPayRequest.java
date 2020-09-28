@@ -21,7 +21,7 @@ import com.xinput.bleach.util.xml.XStreamCDataConverter;
  * @date 2020-09-14 10:55
  */
 @XStreamAlias("xml")
-public class MicroPayRequest extends BaseWeChatPayReq {
+public class MicroPayRequest extends BaseWeChatPayRequest {
 
     /**
      * 设备号

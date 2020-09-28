@@ -10,7 +10,7 @@ import com.xinput.bleach.util.StringUtils;
  * @date 2020-09-14 10:55
  */
 @XStreamAlias("xml")
-public class MicroPayResponse extends BaseWeChatPayResp {
+public class MicroPayResponse extends BaseWeChatPayResponse {
 
     // 以下字段在return_code为SUCCESS的时候有返回
     /**

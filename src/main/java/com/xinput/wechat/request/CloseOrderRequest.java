@@ -9,7 +9,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  * @date 2020-09-17 22:28
  */
 @XStreamAlias("xml")
-public class CloseOrderRequest extends BaseWeChatPayReq {
+public class CloseOrderRequest extends BaseWeChatPayRequest {
 
     @XStreamAlias("out_trade_no")
     private String out_trade_no;

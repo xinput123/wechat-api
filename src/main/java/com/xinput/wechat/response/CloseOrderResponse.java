@@ -10,7 +10,7 @@ import com.xinput.bleach.util.StringUtils;
  * @date 2020-09-17 23:22
  */
 @XStreamAlias("xml")
-public class CloseOrderResponse extends BaseWeChatPayResp {
+public class CloseOrderResponse extends BaseWeChatPayResponse {
 
     // 以下字段在return_code为SUCCESS的时候有返回
 

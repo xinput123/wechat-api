@@ -7,7 +7,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  * @author <a href="mailto:xinput.xx@gmail.com">xinput</a>
  * @date 2020-09-16 20:04
  */
-public abstract class BaseWeChatPayResp {
+public abstract class BaseWeChatPayResponse {
 
     // 返回结果
     /**

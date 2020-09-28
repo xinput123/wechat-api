@@ -7,7 +7,7 @@ import com.xinput.bleach.util.bean.BeanMapUtils;
 import com.xinput.wechat.config.WechatConfig;
 import com.xinput.wechat.enums.SignTypeEnum;
 import com.xinput.wechat.exception.WechatException;
-import com.xinput.wechat.request.BaseWeChatPayReq;
+import com.xinput.wechat.request.BaseWeChatPayRequest;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
@@ -40,7 +40,7 @@ public final class WechatHttpUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(WechatHttpUtils.class);
 
-    public static String withoutCertQequest(String url, BaseWeChatPayReq baseReq) throws Exception {
+    public static String withoutCertQequest(String url, BaseWeChatPayRequest baseReq) throws Exception {
         return post(url, baseReq, false);
     }
 
@@ -51,11 +51,11 @@ public final class WechatHttpUtils {
      * @param baseReq 接口请求参数
      * @return
      */
-    public static String withCertPost(String url, BaseWeChatPayReq baseReq) throws Exception {
+    public static String withCertPost(String url, BaseWeChatPayRequest baseReq) throws Exception {
         return post(url, baseReq, true);
     }
 
-    public static String post(String url, BaseWeChatPayReq baseReq, boolean useCert) throws Exception {
+    public static String post(String url, BaseWeChatPayRequest baseReq, boolean useCert) throws Exception {
         // 设置有效的验证方式
         SignTypeEnum signTypeEnum = SignTypeEnum.getAllowSign();
         baseReq.setSign_type(signTypeEnum.getType());

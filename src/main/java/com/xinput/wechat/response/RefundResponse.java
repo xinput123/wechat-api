@@ -1,9 +1,17 @@
 package com.xinput.wechat.response;
 
+import com.google.common.collect.Lists;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.xinput.bleach.util.BuilderUtils;
+import com.xinput.bleach.util.JsonUtils;
 import com.xinput.bleach.util.StringUtils;
+import com.xinput.bleach.util.bean.BeanMapUtils;
+import com.xinput.wechat.enums.SignTypeEnum;
+import com.xinput.wechat.exception.WechatException;
+import com.xinput.wechat.util.WechatPayUtils;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 申请退款响应值
@@ -12,7 +20,7 @@ import java.util.List;
  * @date 2020-09-17 23:45
  */
 @XStreamAlias("xml")
-public class RefundResponse extends BaseWeChatPayResp {
+public class RefundResponse extends BaseWeChatPayResponse {
 
     // 以下字段在return_code为SUCCESS的时候有返回
 
@@ -413,5 +421,34 @@ public class RefundResponse extends BaseWeChatPayResp {
             return true;
         }
         return false;
+    }
+
+    public static RefundResponse createRefundResponse(Map<String, Object> params, SignTypeEnum signTypeEnum) throws Exception {
+        RefundResponse refundResponse = BeanMapUtils.toBean(params, RefundResponse.class);
+        // 验证签名是否合法
+        if (params.containsKey("sign")
+                && !WechatPayUtils.isSignatureValid(params, signTypeEnum)) {
+            throw new WechatException(String.format("Invalid sign value in close order response : [%s]", JsonUtils.toJsonString(refundResponse, true)));
+        }
+
+        Integer couponRefundCount = refundResponse.getCoupon_refund_count();
+        if (couponRefundCount == null || couponRefundCount < 1) {
+            return refundResponse;
+        }
+
+        // 对于微信支付返回的带有下标的 _0,_1,_2 类型参数进行封装
+        List<RefundCoupon> refundCoupons = Lists.newArrayListWithCapacity(couponRefundCount);
+        for (int i = 0; i < couponRefundCount; i++) {
+            RefundCoupon refundCoupon = BuilderUtils.of(RefundCoupon::new)
+                    .with(RefundCoupon::setIndex, i)
+                    .with(RefundCoupon::setCoupon_refund_id, String.valueOf(params.get("coupon_refund_id_" + i)))
+                    .with(RefundCoupon::setCoupon_type, String.valueOf(params.get("coupon_type_" + i)))
+                    .with(RefundCoupon::setCoupon_refund_fee, Integer.valueOf(String.valueOf(params.get("coupon_refund_fee_" + i))))
+                    .build();
+            refundCoupons.add(refundCoupon);
+        }
+        refundResponse.setRefundCoupons(refundCoupons);
+
+        return refundResponse;
     }
 }

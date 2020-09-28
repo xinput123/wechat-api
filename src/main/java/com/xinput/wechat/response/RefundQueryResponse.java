@@ -1,10 +1,18 @@
 package com.xinput.wechat.response;
 
+import com.google.common.collect.Lists;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.xinput.bleach.util.BuilderUtils;
+import com.xinput.bleach.util.JsonUtils;
 import com.xinput.bleach.util.StringUtils;
+import com.xinput.bleach.util.bean.BeanMapUtils;
+import com.xinput.wechat.enums.SignTypeEnum;
+import com.xinput.wechat.exception.WechatException;
+import com.xinput.wechat.util.WechatPayUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 查询退款响应值
@@ -13,7 +21,7 @@ import java.util.List;
  * @date 2020-09-18 06:54
  */
 @XStreamAlias("xml")
-public class RefundQueryResponse extends BaseWeChatPayResp {
+public class RefundQueryResponse extends BaseWeChatPayResponse {
 
     // 以下字段在return_code为SUCCESS的时候有返回
     /**
@@ -287,5 +295,57 @@ public class RefundQueryResponse extends BaseWeChatPayResp {
             return true;
         }
         return false;
+    }
+
+    public static RefundQueryResponse createRefundQueryResponse(Map<String, Object> params, SignTypeEnum signTypeEnum) throws Exception {
+        RefundQueryResponse refundQueryResponse = BeanMapUtils.toBean(params, RefundQueryResponse.class);
+
+        // 验证签名是否合法
+        if (params.containsKey("sign")
+                && !WechatPayUtils.isSignatureValid(params, signTypeEnum)) {
+            throw new WechatException(String.format("Invalid sign value in WechatPayApi.refundQuery response : [%s]", JsonUtils.toJsonString(refundQueryResponse, true)));
+        }
+
+        Integer refundCount = refundQueryResponse.getRefund_count();
+        if (refundCount == null || refundCount < 1) {
+            return refundQueryResponse;
+        }
+
+        // 对于微信支付返回的带有下标的 _0,_1,_2 类型参数进行封装
+        List<QueryRefund> queryRefunds = Lists.newArrayListWithCapacity(refundCount);
+        for (int i = 0; i < refundCount; i++) {
+            Integer couponRefundCount = Integer.valueOf(String.valueOf(params.get("coupon_refund_count_" + i)));
+            QueryRefund refundCoupon = BuilderUtils.of(QueryRefund::new)
+                    .with(QueryRefund::setIndex, i)
+                    .with(QueryRefund::setRefund_id, String.valueOf(params.get("refund_id_" + i)))
+                    .with(QueryRefund::setRefund_status, String.valueOf(params.get("refund_status_" + i)))
+                    .with(QueryRefund::setCoupon_refund_fee, Integer.valueOf(String.valueOf(params.get("coupon_refund_fee_" + i))))
+                    .with(QueryRefund::setRefund_fee, Integer.valueOf(String.valueOf(params.get("refund_fee_" + i))))
+                    .with(QueryRefund::setSettlement_refund_fee, Integer.valueOf(String.valueOf(params.get("settlement_refund_fee_" + i))))
+                    .with(QueryRefund::setRefund_recv_accout, String.valueOf(params.get("refund_recv_accout_" + i)))
+                    .with(QueryRefund::setRefund_channel, String.valueOf(params.get("refund_channel_" + i)))
+                    .with(QueryRefund::setOut_refund_no, String.valueOf(params.get("out_refund_no_" + i)))
+                    .with(QueryRefund::setCoupon_refund_count, couponRefundCount)
+                    .build();
+            if (couponRefundCount > 0) {
+                List<QueryRefundDetail> details = Lists.newArrayListWithCapacity(couponRefundCount);
+                for (int k = 0; k < couponRefundCount; k++) {
+                    String suffixKey = i + "_" + k;
+                    QueryRefundDetail detail = BuilderUtils.of(QueryRefundDetail::new)
+                            .with(QueryRefundDetail::setDetailIndex, k)
+                            .with(QueryRefundDetail::setCoupon_refund_id, String.valueOf(params.get("refund_channel_" + suffixKey)))
+                            .with(QueryRefundDetail::setCoupon_type, String.valueOf(params.get("coupon_type_" + suffixKey)))
+                            .with(QueryRefundDetail::setCoupon_refund_fee, Integer.valueOf(String.valueOf(params.get("coupon_refund_fee_" + suffixKey))))
+                            .build();
+                    details.add(detail);
+                }
+                refundCoupon.setQueryRefundDetails(details);
+            }
+
+            queryRefunds.add(refundCoupon);
+        }
+        refundQueryResponse.setQueryRefunds(queryRefunds);
+
+        return refundQueryResponse;
     }
 }

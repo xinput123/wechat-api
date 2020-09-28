@@ -11,7 +11,7 @@ import com.xinput.bleach.util.xml.XStreamCDataConverter;
  * @date 2020-09-14 10:55
  */
 @XStreamAlias("xml")
-public class UnifiedOrderRequest extends BaseWeChatPayReq {
+public class UnifiedOrderRequest extends BaseWeChatPayRequest {
 
     /**
      * 设备号

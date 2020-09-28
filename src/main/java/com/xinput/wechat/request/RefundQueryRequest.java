@@ -9,7 +9,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
  * @date 2020-09-17 23:37
  */
 @XStreamAlias("xml")
-public class RefundQueryRequest extends BaseWeChatPayReq {
+public class RefundQueryRequest extends BaseWeChatPayRequest {
 
     /**
      * 微信订单号
