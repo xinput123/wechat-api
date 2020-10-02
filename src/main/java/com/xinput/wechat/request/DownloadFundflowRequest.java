@@ -1,6 +1,10 @@
 package com.xinput.wechat.request;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.xinput.wechat.enums.AccountTypeEnum;
+import com.xinput.wechat.exception.WechatPayException;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * 下载交易账单 - 需要证书
@@ -19,6 +23,7 @@ public class DownloadFundflowRequest extends BaseWeChatPayRequest {
      * 示例值: 20140603
      * 描述: 下载对账单的日期，格式：20140603
      */
+    @NotEmpty(message = "[bill_date] 不能为空")
     @XStreamAlias("bill_date")
     private String bill_date;
 
@@ -29,6 +34,7 @@ public class DownloadFundflowRequest extends BaseWeChatPayRequest {
      * 示例值: Basic
      * 描述: 账单的资金来源账户 {@link com.xinput.wechat.enums.AccountTypeEnum}
      */
+    @NotEmpty(message = "[account_type] 不能为空")
     @XStreamAlias("account_type")
     private String account_type;
 
@@ -66,4 +72,13 @@ public class DownloadFundflowRequest extends BaseWeChatPayRequest {
         this.tar_type = tar_type;
     }
 
+    @Override
+    public void checkConstraints() throws WechatPayException {
+        checkField();
+
+        AccountTypeEnum accountTypeEnum = AccountTypeEnum.getAccountType(this.account_type);
+        if (accountTypeEnum == null) {
+            throw new WechatPayException("[account_type] 值不合法");
+        }
+    }
 }

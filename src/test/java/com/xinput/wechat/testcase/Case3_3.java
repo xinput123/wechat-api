@@ -10,7 +10,7 @@ import com.xinput.wechat.request.UnifiedOrderRequest;
 import com.xinput.wechat.response.OrderQueryResponse;
 import com.xinput.wechat.response.UnifiedOrderResponse;
 import com.xinput.wechat.result.OrderSignature;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 
 /**
@@ -80,7 +80,7 @@ public class Case3_3 {
 
     public void orderQuery(String outTradeNo) {
         try {
-            OrderQueryResponse response = WechatPayApi.orderQueryByOutTradeNo(outTradeNo);
+            OrderQueryResponse response = WechatPayApi.queryOrder(outTradeNo);
             logger.info("查询订单结果:{}", JsonUtils.toJsonString(response, true));
         } catch (Exception e) {
             e.printStackTrace();

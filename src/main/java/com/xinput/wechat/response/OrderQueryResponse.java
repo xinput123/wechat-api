@@ -7,7 +7,7 @@ import com.xinput.bleach.util.JsonUtils;
 import com.xinput.bleach.util.StringUtils;
 import com.xinput.bleach.util.bean.BeanMapUtils;
 import com.xinput.wechat.enums.SignTypeEnum;
-import com.xinput.wechat.exception.WechatException;
+import com.xinput.wechat.exception.WechatPayException;
 import com.xinput.wechat.util.WechatPayUtils;
 
 import java.util.List;
@@ -21,6 +21,26 @@ import java.util.Map;
  */
 @XStreamAlias("xml")
 public class OrderQueryResponse extends BaseWeChatPayResponse {
+
+    /**
+     * 错误原因
+     * 必填: 否
+     * 类型: String(32)
+     * 示例值: 请确认请求参数是否正确param out_trade_no invalid]
+     * 描述: 自定义参数，可以为终端设备号(门店号或收银设备ID)，PC网页或公众号内支付可以传"WEB"
+     */
+    @XStreamAlias("retmsg")
+    private String retmsg;
+
+    /**
+     * 错误状态
+     * 必填: 否
+     * 类型: String(32)
+     * 示例值: 1
+     */
+    @XStreamAlias("retcode")
+    private Integer retcode;
+
 
     // 以下字段在return_code 、result_code、trade_state都为SUCCESS时有返回 ，
     // 如trade_state不为 SUCCESS，则只返回out_trade_no（必传）和attach（选传）
@@ -378,6 +398,22 @@ public class OrderQueryResponse extends BaseWeChatPayResponse {
         this.sub_mch_id = sub_mch_id;
     }
 
+    public String getRetmsg() {
+        return retmsg;
+    }
+
+    public void setRetmsg(String retmsg) {
+        this.retmsg = retmsg;
+    }
+
+    public Integer getRetcode() {
+        return retcode;
+    }
+
+    public void setRetcode(Integer retcode) {
+        this.retcode = retcode;
+    }
+
     @Override
     public boolean isSuccess() {
         if (StringUtils.equalsIgnoreCase("SUCCESS", this.getReturn_code())
@@ -387,13 +423,13 @@ public class OrderQueryResponse extends BaseWeChatPayResponse {
         return false;
     }
 
-    public static OrderQueryResponse createOrderQueryResponse(Map<String, Object> params, SignTypeEnum signTypeEnum) throws Exception {
+    public static OrderQueryResponse createOrderQueryResponse(Map<String, Object> params, SignTypeEnum signTypeEnum) throws WechatPayException {
         OrderQueryResponse response = BeanMapUtils.toBean(params, OrderQueryResponse.class);
 
         // 验证签名是否合法
         if (params.containsKey("sign")
                 && !WechatPayUtils.isSignatureValid(params, signTypeEnum)) {
-            throw new WechatException(String.format("Invalid sign value in query order response : [%s]", JsonUtils.toJsonString(response, true)));
+            throw new WechatPayException(String.format("Invalid sign value in query order response : [%s]", JsonUtils.toJsonString(response, true)));
         }
 
         Integer couponCount = response.getCoupon_count();

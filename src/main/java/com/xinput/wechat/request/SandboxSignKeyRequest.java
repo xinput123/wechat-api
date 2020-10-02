@@ -1,6 +1,10 @@
 package com.xinput.wechat.request;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.xinput.bleach.util.StringUtils;
+import com.xinput.wechat.exception.WechatPayException;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * @author <a href="mailto:xinput.xx@gmail.com">xinput</a>
@@ -9,6 +13,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 @XStreamAlias("xml")
 public class SandboxSignKeyRequest {
 
+    @NotNull(message = "[mch_id] 不能为空")
     @XStreamAlias("mch_id")
     private String mch_id;
 
@@ -18,6 +23,7 @@ public class SandboxSignKeyRequest {
     @XStreamAlias("sign_type")
     private String sign_type;
 
+    @NotNull(message = "[sign] 不能为空")
     @XStreamAlias("sign")
     private String sign;
 
@@ -51,5 +57,11 @@ public class SandboxSignKeyRequest {
 
     public void setSign_type(String sign_type) {
         this.sign_type = sign_type;
+    }
+
+    public void checkConstraints() throws WechatPayException {
+        if (StringUtils.isNullOrEmpty(this.mch_id)) {
+
+        }
     }
 }

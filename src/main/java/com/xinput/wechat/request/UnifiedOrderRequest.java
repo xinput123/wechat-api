@@ -3,6 +3,10 @@ package com.xinput.wechat.request;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
 import com.xinput.bleach.util.xml.XStreamCDataConverter;
+import com.xinput.wechat.exception.WechatPayException;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 /**
  * 统一下单 - 不需要证书
@@ -20,6 +24,7 @@ public class UnifiedOrderRequest extends BaseWeChatPayRequest {
      * 示例值: 013467007045764
      * 描述: 自定义参数，可以为终端设备号(门店号或收银设备ID)，PC网页或公众号内支付可以传"WEB"
      */
+    @NotEmpty(message = "[device_info] 不能为空")
     @XStreamAlias("device_info")
     private String device_info;
 
@@ -30,6 +35,7 @@ public class UnifiedOrderRequest extends BaseWeChatPayRequest {
      * 示例值: 腾讯充值中心-QQ会员充值
      * 描述: 商品简单描述，该字段请按照规范传递，具体请见参数规定 https://pay.weixin.qq.com/wiki/doc/api/wxa/wxa_api.php?chapter=4_2
      */
+    @NotEmpty(message = "[body] 不能为空")
     @XStreamAlias("body")
     private String body;
 
@@ -62,6 +68,7 @@ public class UnifiedOrderRequest extends BaseWeChatPayRequest {
      * 描述: 商户系统内部订单号，要求32个字符内，只能是数字、大小写字母_-|*且在同一个商户号下唯一
      * https://pay.weixin.qq.com/wiki/doc/api/wxa/wxa_api.php?chapter=4_2
      */
+    @NotEmpty(message = "[out_trade_no] 不能为空")
     @XStreamAlias("out_trade_no")
     private String out_trade_no;
 
@@ -82,6 +89,7 @@ public class UnifiedOrderRequest extends BaseWeChatPayRequest {
      * 示例值: 88
      * 描述: 订单总金额，单位为分
      */
+    @NotNull(message = "[total_fee] 不能为空")
     @XStreamAlias("total_fee")
     private Integer total_fee;
 
@@ -92,6 +100,7 @@ public class UnifiedOrderRequest extends BaseWeChatPayRequest {
      * 示例值: 123.12.12.123
      * 描述: 支持IPV4和IPV6两种格式的IP地址。调用微信支付API的机器IP
      */
+    @NotEmpty(message = "[spbill_create_ip] 不能为空")
     @XStreamAlias("spbill_create_ip")
     private String spbill_create_ip;
 
@@ -135,6 +144,7 @@ public class UnifiedOrderRequest extends BaseWeChatPayRequest {
      * 示例值: http://www.weixin.qq.com/wxpay/pay.php
      * 描述: 异步接收微信支付结果通知的回调地址，通知url必须为外网可访问的url，不能携带参数。
      */
+    @NotEmpty(message = "[notify_url] 不能为空")
     @XStreamAlias("notify_url")
     private String notify_url;
 
@@ -145,6 +155,7 @@ public class UnifiedOrderRequest extends BaseWeChatPayRequest {
      * 示例值: JSAPI
      * 描述: 小程序取值如下：JSAPI。 https://pay.weixin.qq.com/wiki/doc/api/wxa/wxa_api.php?chapter=4_2
      */
+    @NotEmpty(message = "[trade_type] 不能为空")
     @XStreamAlias("trade_type")
     private String trade_type;
 
@@ -335,27 +346,7 @@ public class UnifiedOrderRequest extends BaseWeChatPayRequest {
     }
 
     @Override
-    public String toString() {
-
-        return "UnifiedOrderRequest{" +
-                super.toString() + '\'' +
-                ", device_info='" + device_info + '\'' +
-                ", body='" + body + '\'' +
-                ", detail='" + detail + '\'' +
-                ", attach='" + attach + '\'' +
-                ", out_trade_no='" + out_trade_no + '\'' +
-                ", fee_type='" + fee_type + '\'' +
-                ", total_fee=" + total_fee +
-                ", spbill_create_ip='" + spbill_create_ip + '\'' +
-                ", time_start='" + time_start + '\'' +
-                ", time_expire='" + time_expire + '\'' +
-                ", goods_tag='" + goods_tag + '\'' +
-                ", notify_url='" + notify_url + '\'' +
-                ", trade_type='" + trade_type + '\'' +
-                ", product_id='" + product_id + '\'' +
-                ", limit_pay='" + limit_pay + '\'' +
-                ", openid='" + openid + '\'' +
-                ", receipt='" + receipt + '\'' +
-                '}';
+    public void checkConstraints() throws WechatPayException {
+        checkField();
     }
 }

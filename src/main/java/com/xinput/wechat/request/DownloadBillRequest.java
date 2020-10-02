@@ -1,6 +1,9 @@
 package com.xinput.wechat.request;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.xinput.wechat.exception.WechatPayException;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * 下载交易账单 - 不需要证书
@@ -18,6 +21,7 @@ public class DownloadBillRequest extends BaseWeChatPayRequest {
      * 示例值: 20140603
      * 描述: 下载对账单的日期，格式：20140603
      */
+    @NotEmpty(message = "[bill_date] 不能为空")
     @XStreamAlias("bill_date")
     private String bill_date;
 
@@ -66,12 +70,7 @@ public class DownloadBillRequest extends BaseWeChatPayRequest {
     }
 
     @Override
-    public String toString() {
-        return "DownloadBillRequest{" +
-                super.toString() + '\'' +
-                ", bill_date='" + bill_date + '\'' +
-                ", bill_type='" + bill_type + '\'' +
-                ", tar_type='" + tar_type + '\'' +
-                '}';
+    public void checkConstraints() throws WechatPayException {
+
     }
 }

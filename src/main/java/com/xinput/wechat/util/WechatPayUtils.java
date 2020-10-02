@@ -6,6 +6,8 @@ import com.xinput.bleach.util.StringUtils;
 import com.xinput.bleach.util.date.LocalDateTimeUtils;
 import com.xinput.wechat.config.WechatConfig;
 import com.xinput.wechat.enums.SignTypeEnum;
+import com.xinput.wechat.exception.WechatPayException;
+import org.apache.commons.collections4.MapUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -35,7 +37,11 @@ public class WechatPayUtils {
      * @param signType 签名方式
      * @return 签名
      */
-    public static String generateSignature(final Map<String, Object> paramMap, SignTypeEnum signType) throws Exception {
+    public static String generateSignature(final Map<String, Object> paramMap, SignTypeEnum signType) throws WechatPayException {
+        if (MapUtils.isEmpty(paramMap)) {
+            return null;
+        }
+
         ArrayList<String> list = Lists.newArrayListWithCapacity(paramMap.size());
         paramMap.forEach((paramKey, paramValue) -> {
             // key不需要用于计算签名
@@ -66,7 +72,7 @@ public class WechatPayUtils {
         }
     }
 
-    public static boolean isSignatureValid(Map<String, Object> data, SignTypeEnum signType) throws Exception {
+    public static boolean isSignatureValid(Map<String, Object> data, SignTypeEnum signType) throws WechatPayException {
         if (!data.containsKey("sign")) {
             return false;
         }

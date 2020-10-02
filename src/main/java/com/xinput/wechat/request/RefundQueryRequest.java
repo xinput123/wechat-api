@@ -1,6 +1,7 @@
 package com.xinput.wechat.request;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.xinput.wechat.exception.WechatPayException;
 
 /**
  * 查询退款 - 不需要证书
@@ -103,14 +104,7 @@ public class RefundQueryRequest extends BaseWeChatPayRequest {
     }
 
     @Override
-    public String toString() {
-        return "RefundQueryRequest{" +
-                super.toString() + '\'' +
-                ", transaction_id='" + transaction_id + '\'' +
-                ", out_trade_no='" + out_trade_no + '\'' +
-                ", out_refund_no='" + out_refund_no + '\'' +
-                ", refund_id='" + refund_id + '\'' +
-                ", offset=" + offset +
-                '}';
+    public void checkConstraints() throws WechatPayException {
+
     }
 }

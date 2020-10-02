@@ -1,12 +1,16 @@
 package com.xinput.wechat.request;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.xinput.wechat.exception.WechatPayException;
+import com.xinput.wechat.util.ValidateUtils;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * @author <a href="mailto:xinput.xx@gmail.com">xinput</a>
  * @date 2020-09-16 20:04
  */
-public class BaseWeChatPayRequest {
+public abstract class BaseWeChatPayRequest {
 
     /**
      * 小程序ID
@@ -15,6 +19,7 @@ public class BaseWeChatPayRequest {
      * 示例值: wxd678efh567hg6787
      * 描述: 微信分配的小程序ID
      */
+    @NotEmpty(message = "[appid] 不能为空")
     @XStreamAlias("appid")
     private String appid;
 
@@ -25,6 +30,7 @@ public class BaseWeChatPayRequest {
      * 示例值: 1230000109
      * 描述: 微信支付分配的商户号
      */
+    @NotEmpty(message = "[mch_id] 不能为空")
     @XStreamAlias("mch_id")
     private String mch_id;
 
@@ -35,6 +41,7 @@ public class BaseWeChatPayRequest {
      * 示例值: 5K8264ILTKCH16CQ2502SI8ZNMTM67VS
      * 描述: 随机字符串，长度要求在32位以内。推荐 https://pay.weixin.qq.com/wiki/doc/api/wxa/wxa_api.php?chapter=4_3
      */
+    @NotEmpty(message = "[nonce_str] 不能为空")
     @XStreamAlias("nonce_str")
     private String nonce_str;
 
@@ -55,6 +62,7 @@ public class BaseWeChatPayRequest {
      * 示例值: C380BEC2BFD727A4B6845133519F3AD6
      * 描述:  通过签名算法计算得出的签名值 https://pay.weixin.qq.com/wiki/doc/api/wxa/wxa_api.php?chapter=4_3
      */
+    @NotEmpty(message = "[sign] 不能为空")
     @XStreamAlias("sign")
     private String sign;
 
@@ -98,12 +106,12 @@ public class BaseWeChatPayRequest {
         this.sign_type = sign_type;
     }
 
-    @Override
-    public String toString() {
-        return "appid='" + appid + '\'' +
-                ", mch_id='" + mch_id + '\'' +
-                ", nonce_str='" + nonce_str + '\'' +
-                ", sign_type='" + sign_type + '\'' +
-                ", sign='" + sign;
+    /**
+     * 检查约束情况.
+     */
+    public abstract void checkConstraints() throws WechatPayException;
+
+    public void checkField() throws WechatPayException {
+        ValidateUtils.validate(this);
     }
 }

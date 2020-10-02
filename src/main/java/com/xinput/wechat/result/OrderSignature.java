@@ -29,7 +29,7 @@ public class OrderSignature {
      */
     private String paySign;
 
-    public OrderSignature(UnifiedOrderResponse response) throws Exception {
+    public OrderSignature(UnifiedOrderResponse response) {
         this.appId = response.getAppid();
         this.nonceStr = ObjectId.stringId();
         this.prepayId = response.getPrepay_id();

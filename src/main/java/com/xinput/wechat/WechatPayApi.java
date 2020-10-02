@@ -7,12 +7,14 @@ import com.xinput.bleach.util.ObjectId;
 import com.xinput.bleach.util.StringUtils;
 import com.xinput.bleach.util.XmlUtils;
 import com.xinput.bleach.util.bean.BeanMapUtils;
+import com.xinput.bleach.util.date.LocalDateUtils;
 import com.xinput.wechat.config.WechatConfig;
 import com.xinput.wechat.consts.WechatConsts;
+import com.xinput.wechat.enums.AccountTypeEnum;
 import com.xinput.wechat.enums.PayUrlEnum;
 import com.xinput.wechat.enums.SignTypeEnum;
 import com.xinput.wechat.enums.TradeTypeEnum;
-import com.xinput.wechat.exception.WechatException;
+import com.xinput.wechat.exception.WechatPayException;
 import com.xinput.wechat.request.CloseOrderRequest;
 import com.xinput.wechat.request.DownloadBillRequest;
 import com.xinput.wechat.request.DownloadFundflowRequest;
@@ -37,11 +39,15 @@ import com.xinput.wechat.result.WechatFundFlowBaseResult;
 import com.xinput.wechat.result.WechatFundFlowResult;
 import com.xinput.wechat.result.WechatPayBillResult;
 import com.xinput.wechat.util.CsvUtils;
+import com.xinput.wechat.util.ValidateUtils;
 import com.xinput.wechat.util.WechatHttpUtils;
 import com.xinput.wechat.util.WechatPayUtils;
 import com.xinput.wechat.util.WechatXmlUtils;
 import org.slf4j.Logger;
 
+import javax.validation.Valid;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -49,9 +55,15 @@ import java.util.Map;
  * @author <a href="mailto:xinput.xx@gmail.com">xinput</a>
  * @date 2020-09-16 17:52
  */
+@Valid
 public class WechatPayApi {
 
     private static final Logger logger = Logs.get();
+
+    /**
+     * 获取沙箱签名密钥
+     */
+    private static final String GET_SIGNKEY = PayUrlEnum.SANDBOX_DOMAIN.getUrl() + "/getsignkey";
 
     private static String getDomain() {
         if (WechatConfig.getUseSandbox()) {
@@ -61,19 +73,44 @@ public class WechatPayApi {
         }
     }
 
-    public static SandboxSignKeyResponse getSandboxnewSignKey(SandboxSignKeyRequest sandboxSignKeyRequest) throws Exception {
-        sandboxSignKeyRequest.setSign(
-                WechatPayUtils.generateSignature(BeanMapUtils.toMap(sandboxSignKeyRequest), SignTypeEnum.MD5));
+    public static SandboxSignKeyResponse getSandboxnewSignKey() throws WechatPayException {
+        SandboxSignKeyRequest request = BuilderUtils.of(SandboxSignKeyRequest::new)
+                .with(SandboxSignKeyRequest::setMch_id, WechatConfig.getWechatMchId())
+                .with(SandboxSignKeyRequest::setNonce_str, ObjectId.stringId())
+                .build();
 
-        String result = WechatHttpUtils.execute(getDomain() + PayUrlEnum.GET_SIGNKEY.getUrl(), XmlUtils.toXml(sandboxSignKeyRequest), false);
-        logger.info("result : [{}].", result);
+        return getSandboxnewSignKey(request);
+    }
+
+    public static SandboxSignKeyResponse getSandboxnewSignKey(SandboxSignKeyRequest sandboxSignKeyRequest) throws WechatPayException {
+        if (WechatConfig.getUseSandbox()) {
+            throw new WechatPayException("沙箱环境测试，不能调用该接口...");
+        }
+
+        if (sandboxSignKeyRequest == null) {
+            sandboxSignKeyRequest = new SandboxSignKeyRequest();
+        }
+
+        if (StringUtils.isNullOrEmpty(sandboxSignKeyRequest.getNonce_str())) {
+            sandboxSignKeyRequest.setNonce_str(ObjectId.stringId());
+        }
+
+        String sign = WechatPayUtils.generateSignature(
+                BeanMapUtils.toMap(sandboxSignKeyRequest), SignTypeEnum.MD5
+        );
+        sandboxSignKeyRequest.setSign(sign);
+
+        ValidateUtils.validate(sandboxSignKeyRequest);
+
+        String result = WechatHttpUtils.execute(GET_SIGNKEY, XmlUtils.toXml(sandboxSignKeyRequest), false);
+        System.out.println(result);
         return XmlUtils.toBean(result, SandboxSignKeyResponse.class);
     }
 
     /**
      * 付款码付款
      */
-    public static MicroPayResponse microPay(MicroPayRequest microPayRequest) throws Exception {
+    public static MicroPayResponse microPay(MicroPayRequest microPayRequest) throws WechatPayException {
         String result = WechatHttpUtils.withoutCertQequest(getDomain() + PayUrlEnum.MICROPAY.getUrl(), microPayRequest);
         return XmlUtils.toBean(result, MicroPayResponse.class);
     }
@@ -92,7 +129,7 @@ public class WechatPayApi {
      */
     public static UnifiedOrderResponse unifiedOrder(TradeTypeEnum tradeTypeEnum, String openId, String deviceInfo,
                                                     String outTradeNo, String body, String ip, Integer totalFee,
-                                                    String notifyUrl) throws Exception {
+                                                    String notifyUrl) throws WechatPayException {
         UnifiedOrderRequest request = BuilderUtils.of(UnifiedOrderRequest::new)
                 .with(UnifiedOrderRequest::setBody, body)
                 .with(UnifiedOrderRequest::setSpbill_create_ip, ip)
@@ -114,7 +151,11 @@ public class WechatPayApi {
      * @return
      * @throws Exception
      */
-    public static UnifiedOrderResponse unifiedOrder(UnifiedOrderRequest unifiedOrderRequest) throws Exception {
+    public static UnifiedOrderResponse unifiedOrder(UnifiedOrderRequest unifiedOrderRequest) throws WechatPayException {
+        if (unifiedOrderRequest == null) {
+            unifiedOrderRequest = new UnifiedOrderRequest();
+        }
+
         if (StringUtils.isNullOrEmpty(unifiedOrderRequest.getNotify_url())) {
             unifiedOrderRequest.setNotify_url(WechatConfig.getWechatNotifyUnifiedOrderUrl());
         }
@@ -126,7 +167,7 @@ public class WechatPayApi {
         // 验证签名是否合法
         if (params.containsKey("sign")
                 && !WechatPayUtils.isSignatureValid(params, SignTypeEnum.getSignType(unifiedOrderRequest.getSign_type()))) {
-            throw new WechatException(String.format("Invalid sign value in unified order response : [%s]", JsonUtils.toJsonString(response, true)));
+            throw new WechatPayException(String.format("Invalid sign value in unified order response : [%s]", JsonUtils.toJsonString(response, true)));
         }
 
         return response;
@@ -138,12 +179,13 @@ public class WechatPayApi {
      * @param transactionId 微信订单号
      * @return
      */
-    public static OrderQueryResponse orderQueryByTransaction(String transactionId) throws Exception {
+    public static OrderQueryResponse queryOrder(String transactionId, String outTradeNo) throws WechatPayException {
         OrderQueryRequest orderQueryRequest = BuilderUtils.of(OrderQueryRequest::new)
                 .with(OrderQueryRequest::setTransaction_id, transactionId)
+                .with(OrderQueryRequest::setOut_trade_no, outTradeNo)
                 .build();
 
-        return orderQuery(orderQueryRequest);
+        return queryOrder(orderQueryRequest);
     }
 
     /**
@@ -152,12 +194,12 @@ public class WechatPayApi {
      * @param outTradeNo 商户订单号
      * @return
      */
-    public static OrderQueryResponse orderQueryByOutTradeNo(String outTradeNo) throws Exception {
+    public static OrderQueryResponse queryOrder(String outTradeNo) throws WechatPayException {
         OrderQueryRequest orderQueryRequest = BuilderUtils.of(OrderQueryRequest::new)
                 .with(OrderQueryRequest::setOut_trade_no, outTradeNo)
                 .build();
 
-        return orderQuery(orderQueryRequest);
+        return queryOrder(orderQueryRequest);
     }
 
     /**
@@ -166,7 +208,10 @@ public class WechatPayApi {
      * @param orderQueryRequest 查询订单请求参数
      * @return
      */
-    public static OrderQueryResponse orderQuery(OrderQueryRequest orderQueryRequest) throws Exception {
+    public static OrderQueryResponse queryOrder(OrderQueryRequest orderQueryRequest) throws WechatPayException {
+        if (orderQueryRequest == null) {
+            orderQueryRequest = new OrderQueryRequest();
+        }
         String result = WechatHttpUtils.withoutCertQequest(getDomain() + PayUrlEnum.ORDER_QUERY.getUrl(), orderQueryRequest);
         Map<String, Object> params = WechatXmlUtils.toMap(result);
         return OrderQueryResponse.createOrderQueryResponse(params, SignTypeEnum.getSignType(orderQueryRequest.getSign_type()));
@@ -177,7 +222,7 @@ public class WechatPayApi {
      *
      * @param outTradeNo 商户订单号
      */
-    public static CloseOrderResponse closeOrder(String outTradeNo) throws Exception {
+    public static CloseOrderResponse closeOrder(String outTradeNo) throws WechatPayException {
         CloseOrderRequest closeOrderRequest = BuilderUtils.of(CloseOrderRequest::new)
                 .with(CloseOrderRequest::setOut_trade_no, outTradeNo)
                 .build();
@@ -188,14 +233,17 @@ public class WechatPayApi {
     /**
      * 关闭订单
      */
-    public static CloseOrderResponse closeOrder(CloseOrderRequest closeOrderRequest) throws Exception {
+    public static CloseOrderResponse closeOrder(CloseOrderRequest closeOrderRequest) throws WechatPayException {
+        if (closeOrderRequest == null) {
+            closeOrderRequest = new CloseOrderRequest();
+        }
         String result = WechatHttpUtils.withoutCertQequest(getDomain() + PayUrlEnum.CLOSE_ORDER.getUrl(), closeOrderRequest);
         Map<String, Object> params = WechatXmlUtils.toMap(result);
         CloseOrderResponse closeOrderResponse = BeanMapUtils.toBean(params, CloseOrderResponse.class);
         // 验证签名是否合法
         if (params.containsKey("sign")
                 && !WechatPayUtils.isSignatureValid(params, SignTypeEnum.getSignType(closeOrderRequest.getSign_type()))) {
-            throw new WechatException(String.format("Invalid sign value in close order response : [%s]", JsonUtils.toJsonString(closeOrderResponse, true)));
+            throw new WechatPayException(String.format("Invalid sign value in close order response : [%s]", JsonUtils.toJsonString(closeOrderResponse, true)));
         }
 
         return closeOrderResponse;
@@ -204,13 +252,15 @@ public class WechatPayApi {
     /**
      * 申请退款
      *
-     * @param outTradeNo 商户订单号
-     * @param totalFee   订单金额
-     * @param refundFee  退款金额
+     * @param outTradeNo  商户订单号
+     * @param outRefundNo 商户退款单号 自定义
+     * @param totalFee    订单金额
+     * @param refundFee   退款金额
      */
-    public static RefundResponse refund(String outTradeNo, Integer totalFee, Integer refundFee) throws Exception {
+    public static RefundResponse refund(String outTradeNo, String outRefundNo, Integer totalFee, Integer refundFee) throws WechatPayException {
         RefundRequest request = BuilderUtils.of(RefundRequest::new)
                 .with(RefundRequest::setOut_trade_no, outTradeNo)
+                .with(RefundRequest::setOut_refund_no, outRefundNo)
                 .with(RefundRequest::setTotal_fee, totalFee)
                 .with(RefundRequest::setRefund_fee, refundFee)
                 .build();
@@ -223,23 +273,9 @@ public class WechatPayApi {
      *
      * @param refundRequest 申请退款请求
      */
-    public static RefundResponse refund(RefundRequest refundRequest) throws Exception {
-        Integer totalFee = refundRequest.getTotal_fee();
-        if (totalFee == null || totalFee <= 0) {
-            throw new WechatException(String.format("账单总金额错误,请输入正确的账单总金额. total_fee:[%s]", totalFee));
-        }
-
-        Integer refundFee = refundRequest.getRefund_fee();
-        if (refundFee == null || refundFee <= 0) {
-            throw new WechatException(String.format("退款金额错误,请输入正确的退款金额. refund_fee:[%s]", refundFee));
-        }
-
-        if (totalFee < refundFee) {
-            throw new WechatException(String.format("退款金额不能大于账单总金额,请检查. total_fee:[%s], refund_fee:[%s]", totalFee, refundFee));
-        }
-
-        if (StringUtils.isNullOrEmpty(refundRequest.getOut_refund_no())) {
-            refundRequest.setOut_refund_no(ObjectId.stringId());
+    public static RefundResponse refund(RefundRequest refundRequest) throws WechatPayException {
+        if (refundRequest == null) {
+            refundRequest = new RefundRequest();
         }
 
         if (StringUtils.isNullOrEmpty(refundRequest.getNotify_url())) {
@@ -257,7 +293,7 @@ public class WechatPayApi {
      *
      * @param transactionId 微信订单号
      */
-    public static RefundQueryResponse refundQueryByTransaction(String transactionId) throws Exception {
+    public static RefundQueryResponse refundQueryByTransaction(String transactionId) throws WechatPayException {
         RefundQueryRequest request = BuilderUtils.of(RefundQueryRequest::new)
                 .with(RefundQueryRequest::setTransaction_id, transactionId)
                 .build();
@@ -270,7 +306,7 @@ public class WechatPayApi {
      *
      * @param outTradeNo 商户订单号
      */
-    public static RefundQueryResponse refundQueryByOutTradeNo(String outTradeNo) throws Exception {
+    public static RefundQueryResponse refundQueryByOutTradeNo(String outTradeNo) throws WechatPayException {
         RefundQueryRequest request = BuilderUtils.of(RefundQueryRequest::new)
                 .with(RefundQueryRequest::setOut_trade_no, outTradeNo)
                 .build();
@@ -284,7 +320,7 @@ public class WechatPayApi {
      *
      * @param outRefundNo 商户退款单号
      */
-    public static RefundQueryResponse refundQueryByOutRefundNo(String outRefundNo) throws Exception {
+    public static RefundQueryResponse refundQueryByOutRefundNo(String outRefundNo) throws WechatPayException {
         RefundQueryRequest request = BuilderUtils.of(RefundQueryRequest::new)
                 .with(RefundQueryRequest::setOut_refund_no, outRefundNo)
                 .build();
@@ -297,7 +333,7 @@ public class WechatPayApi {
      *
      * @param refundId 微信退款单号
      */
-    public static RefundQueryResponse refundQueryByRefund(String refundId) throws Exception {
+    public static RefundQueryResponse refundQueryByRefund(String refundId) throws WechatPayException {
         RefundQueryRequest request = BuilderUtils.of(RefundQueryRequest::new)
                 .with(RefundQueryRequest::setRefund_id, refundId)
                 .build();
@@ -308,7 +344,10 @@ public class WechatPayApi {
     /**
      * 查询退款
      */
-    public static RefundQueryResponse refundQuery(RefundQueryRequest refundQueryRequest) throws Exception {
+    public static RefundQueryResponse refundQuery(RefundQueryRequest refundQueryRequest) throws WechatPayException {
+        if (refundQueryRequest == null) {
+            refundQueryRequest = new RefundQueryRequest();
+        }
         String result = WechatHttpUtils.withoutCertQequest(getDomain() + PayUrlEnum.REFUND_QUERY.getUrl(), refundQueryRequest);
         Map<String, Object> params = WechatXmlUtils.toMap(result);
         return RefundQueryResponse.createRefundQueryResponse(params, SignTypeEnum.getSignType(refundQueryRequest.getSign_type()));
@@ -317,15 +356,23 @@ public class WechatPayApi {
     /**
      * 下载交易账单
      */
-    public static String downloadBillContent(DownloadBillRequest downloadBillRequest) throws Exception {
+    public static String downloadBillContent(DownloadBillRequest downloadBillRequest) throws WechatPayException {
+        if (downloadBillRequest == null) {
+            downloadBillRequest = new DownloadBillRequest();
+        }
         return WechatHttpUtils.withoutCertQequest(getDomain() + PayUrlEnum.DOWNLOAD_BILL.getUrl(), downloadBillRequest).replaceAll("`", "");
     }
 
     /**
      * 下载交易账单
      */
-    public static WechatPayBillResult downloadBill(DownloadBillRequest downloadBillRequest) throws Exception {
+    public static WechatPayBillResult downloadBill(DownloadBillRequest downloadBillRequest) throws WechatPayException {
+        if (downloadBillRequest == null) {
+            downloadBillRequest = new DownloadBillRequest();
+        }
+
         String result = WechatHttpUtils.withoutCertQequest(getDomain() + PayUrlEnum.DOWNLOAD_BILL.getUrl(), downloadBillRequest).replaceAll("`", "");
+        System.out.println(result);
 
         // 微信总共返回的数据条数，包括表头
         List<BillCount> billCounts = CsvUtils.readCsv(result, BillCount.class);
@@ -336,12 +383,38 @@ public class WechatPayApi {
         List<WechatBillInfo> wechatBillInfos = CsvUtils.readCsv(result, 1, billCount - 3, WechatBillInfo.class);
         wechatPayBillResult.setWechatBillInfos(wechatBillInfos);
         return wechatPayBillResult;
+
     }
 
     /**
      * 下载资金账单
      */
-    public static WechatFundFlowResult downloadFundflow(DownloadFundflowRequest request) throws Exception {
+    public static WechatFundFlowResult downloadFundflow(LocalDate billDate, AccountTypeEnum accountTypeEnum) throws WechatPayException {
+        return downloadFundflow(
+                LocalDateUtils.format(billDate, DateTimeFormatter.ofPattern("yyyyMMdd")),
+                accountTypeEnum);
+    }
+
+    /**
+     * 下载资金账单
+     */
+    public static WechatFundFlowResult downloadFundflow(String billDate, AccountTypeEnum accountTypeEnum) throws WechatPayException {
+        DownloadFundflowRequest request = BuilderUtils.of(DownloadFundflowRequest::new)
+                .with(DownloadFundflowRequest::setBill_date, billDate)
+                .with(DownloadFundflowRequest::setAccount_type, accountTypeEnum.getAccountType())
+                .build();
+
+        return downloadFundflow(request);
+    }
+
+    /**
+     * 下载资金账单
+     */
+    public static WechatFundFlowResult downloadFundflow(DownloadFundflowRequest request) throws WechatPayException {
+        if (request == null) {
+            request = new DownloadFundflowRequest();
+        }
+
         String result = WechatHttpUtils.withCertPost(
                 getDomain() + PayUrlEnum.DOWNLOAD_FUND_FLOW.getUrl(), request)
                 .replaceAll("`", StringUtils.EMPTY);
@@ -376,7 +449,7 @@ public class WechatPayApi {
      * @param beginTime 开始时间
      * @param endTime   结束是爱你
      */
-    public static QueryCommentResponse queryComment(String beginTime, String endTime) throws Exception {
+    public static QueryCommentResponse queryComment(String beginTime, String endTime) throws WechatPayException {
         return queryComment(beginTime, endTime, 0);
     }
 
@@ -384,10 +457,10 @@ public class WechatPayApi {
      * 拉取订单评价数据
      *
      * @param beginTime 开始时间
-     * @param endTime   结束是爱你
+     * @param endTime   结束时间
      * @param offset    偏移量
      */
-    public static QueryCommentResponse queryComment(String beginTime, String endTime, int offset) throws Exception {
+    public static QueryCommentResponse queryComment(String beginTime, String endTime, int offset) throws WechatPayException {
         return queryComment(beginTime, endTime, offset, 200);
     }
 
@@ -395,11 +468,11 @@ public class WechatPayApi {
      * 拉取订单评价数据
      *
      * @param beginTime 开始时间
-     * @param endTime   结束是爱你
+     * @param endTime   结束时间
      * @param offset    偏移量
      * @param limit     条数
      */
-    public static QueryCommentResponse queryComment(String beginTime, String endTime, int offset, int limit) throws Exception {
+    public static QueryCommentResponse queryComment(String beginTime, String endTime, Integer offset, Integer limit) throws WechatPayException {
         QueryCommentRequest request = BuilderUtils.of(QueryCommentRequest::new)
                 .with(QueryCommentRequest::setBegin_time, beginTime)
                 .with(QueryCommentRequest::setEnd_time, endTime)
@@ -415,11 +488,15 @@ public class WechatPayApi {
      *
      * @param request 订单评价数据请求
      */
-    public static QueryCommentResponse queryComment(QueryCommentRequest request) throws Exception {
-        if (request.getOffset() < 0) {
+    public static QueryCommentResponse queryComment(QueryCommentRequest request) throws WechatPayException {
+        if (request == null) {
+            request = new QueryCommentRequest();
+        }
+
+        if (request.getOffset() == null || request.getOffset() < 0) {
             request.setOffset(0);
         }
-        if (request.getLimit() < 1 || request.getLimit() > 200) {
+        if (request.getLimit() == null || request.getLimit() < 1 || request.getLimit() > 200) {
             request.setLimit(200);
         }
         String result = WechatHttpUtils.withCertPost(getDomain() + PayUrlEnum.QUERY_COMMENT.getUrl(), request);

@@ -11,7 +11,7 @@ import com.xinput.wechat.response.RefundQueryResponse;
 import com.xinput.wechat.response.RefundResponse;
 import com.xinput.wechat.response.UnifiedOrderResponse;
 import com.xinput.wechat.result.OrderSignature;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 
 /**
@@ -34,9 +34,9 @@ public class Case3_4 {
     @Test
     public void T3_4() {
         String outTradeNo = ObjectId.stringId();
-        outTradeNo = "5f6c3aaf6b5adf84b8b34098";
-//        unifiedOrder(outTradeNo);
-//        refund(outTradeNo);
+        System.out.println("outTradeNo : " + outTradeNo);
+        unifiedOrder(outTradeNo);
+        refund(outTradeNo);
         refundquery(outTradeNo);
     }
 
@@ -74,8 +74,10 @@ public class Case3_4 {
     }
 
     public void refund(String outTradeNo) {
+        String id = ObjectId.stringId();
+        System.out.println("id = " + id);
         try {
-            RefundResponse response = WechatPayApi.refund(outTradeNo, 502, 502);
+            RefundResponse response = WechatPayApi.refund(outTradeNo, id, 502, 502);
             logger.info(JsonUtils.toJsonString(response, true));
         } catch (Exception e) {
             e.printStackTrace();

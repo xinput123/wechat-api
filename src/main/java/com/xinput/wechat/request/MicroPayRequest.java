@@ -3,6 +3,7 @@ package com.xinput.wechat.request;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
 import com.xinput.bleach.util.xml.XStreamCDataConverter;
+import com.xinput.wechat.exception.WechatPayException;
 
 /**
  * 付款码支付 - 不需要证书
@@ -289,5 +290,10 @@ public class MicroPayRequest extends BaseWeChatPayRequest {
 
     public void setAuth_code(String auth_code) {
         this.auth_code = auth_code;
+    }
+
+    @Override
+    public void checkConstraints() throws WechatPayException {
+
     }
 }

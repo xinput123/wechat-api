@@ -8,7 +8,7 @@ import com.xinput.wechat.enums.BillTypeEnum;
 import com.xinput.wechat.request.DownloadBillRequest;
 import com.xinput.wechat.result.WechatBillInfo;
 import com.xinput.wechat.result.WechatPayBillResult;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 

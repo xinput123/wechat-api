@@ -8,8 +8,6 @@ public enum PayUrlEnum {
     DOMAIN("https://api.mch.weixin.qq.com", "微信支付请求路径"),
     SANDBOX_DOMAIN("https://api.mch.weixin.qq.com/sandboxnew", "微信支付请求路径"),
 
-    GET_SIGNKEY("/getsignkey", "获取沙箱签名密钥"),
-
     MICROPAY("/pay/micropay", "付款码付款"),
 
     UNIFIED_ORDER("/pay/unifiedorder", "统一下单(不需要证书)"),

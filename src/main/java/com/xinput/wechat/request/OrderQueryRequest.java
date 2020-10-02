@@ -1,6 +1,9 @@
 package com.xinput.wechat.request;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.xinput.wechat.exception.WechatPayException;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * 查询订单参数 - 不需要证书
@@ -17,6 +20,7 @@ public class OrderQueryRequest extends BaseWeChatPayRequest {
      * 类型: String(32)
      * 示例值: 1009660380201506130728806387
      * 描述: 微信的订单号，优先使用
+     * Note: 注释，虽然文档说的是 【transaction_id】和 【out_trade_no】 二选一，但是实际调用过程 【out_trade_no】必须有值
      */
     @XStreamAlias("transaction_id")
     private String transaction_id;
@@ -29,6 +33,7 @@ public class OrderQueryRequest extends BaseWeChatPayRequest {
      * 描述: 商户系统内部订单号，要求32个字符内，只能是数字、大小写字母_-|*@ ，且在同一个商户号下唯一。
      * https://pay.weixin.qq.com/wiki/doc/api/wxa/wxa_api.php?chapter=4_2
      */
+    @NotEmpty(message = "[out_trade_no] 不能为空")
     @XStreamAlias("out_trade_no")
     private String out_trade_no;
 
@@ -49,11 +54,7 @@ public class OrderQueryRequest extends BaseWeChatPayRequest {
     }
 
     @Override
-    public String toString() {
-        return "OrderQueryRequest{" +
-                super.toString() + '\'' +
-                ", transaction_id='" + transaction_id + '\'' +
-                ", out_trade_no='" + out_trade_no + '\'' +
-                '}';
+    public void checkConstraints() throws WechatPayException {
+        checkField();
     }
 }

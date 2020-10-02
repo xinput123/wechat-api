@@ -7,7 +7,7 @@ import com.xinput.bleach.util.JsonUtils;
 import com.xinput.bleach.util.StringUtils;
 import com.xinput.bleach.util.bean.BeanMapUtils;
 import com.xinput.wechat.enums.SignTypeEnum;
-import com.xinput.wechat.exception.WechatException;
+import com.xinput.wechat.exception.WechatPayException;
 import com.xinput.wechat.util.WechatPayUtils;
 
 import java.util.List;
@@ -423,12 +423,12 @@ public class RefundResponse extends BaseWeChatPayResponse {
         return false;
     }
 
-    public static RefundResponse createRefundResponse(Map<String, Object> params, SignTypeEnum signTypeEnum) throws Exception {
+    public static RefundResponse createRefundResponse(Map<String, Object> params, SignTypeEnum signTypeEnum) throws WechatPayException {
         RefundResponse refundResponse = BeanMapUtils.toBean(params, RefundResponse.class);
         // 验证签名是否合法
         if (params.containsKey("sign")
                 && !WechatPayUtils.isSignatureValid(params, signTypeEnum)) {
-            throw new WechatException(String.format("Invalid sign value in close order response : [%s]", JsonUtils.toJsonString(refundResponse, true)));
+            throw new WechatPayException(String.format("Invalid sign value in close order response : [%s]", JsonUtils.toJsonString(refundResponse, true)));
         }
 
         Integer couponRefundCount = refundResponse.getCoupon_refund_count();

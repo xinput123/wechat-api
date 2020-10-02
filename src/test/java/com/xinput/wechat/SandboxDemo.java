@@ -5,11 +5,15 @@ import com.xinput.bleach.util.JsonUtils;
 import com.xinput.bleach.util.ObjectId;
 import com.xinput.wechat.config.WechatConfig;
 import com.xinput.wechat.enums.SignTypeEnum;
+import com.xinput.wechat.exception.WechatPayException;
 import com.xinput.wechat.request.MicroPayRequest;
 import com.xinput.wechat.request.SandboxSignKeyRequest;
 import com.xinput.wechat.response.MicroPayResponse;
 import com.xinput.wechat.response.SandboxSignKeyResponse;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * 微信沙箱环境测试
@@ -23,15 +27,43 @@ import org.junit.Test;
 public class SandboxDemo {
 
     @Test
-    public void getSandboxnewSignKey() throws Exception {
+    public void createSandboxnewSignKey() throws WechatPayException {
+        SandboxSignKeyResponse response = WechatPayApi.getSandboxnewSignKey();
+        System.out.println(JsonUtils.toJsonString(response, true));
+    }
+
+    @Test
+    public void getSandboxnewSignKey() throws WechatPayException {
         SandboxSignKeyRequest request = BuilderUtils.of(SandboxSignKeyRequest::new)
                 .with(SandboxSignKeyRequest::setMch_id, WechatConfig.getWechatMchId())
                 .with(SandboxSignKeyRequest::setNonce_str, ObjectId.stringId())
                 .with(SandboxSignKeyRequest::setSign_type, SignTypeEnum.MD5.getType())
                 .build();
-
         SandboxSignKeyResponse response = WechatPayApi.getSandboxnewSignKey(request);
         System.out.println(JsonUtils.toJsonString(response, true));
+    }
+
+    @Test
+    public void getSandboxnewSignKeyException() {
+        SandboxSignKeyRequest mchRequest = BuilderUtils.of(SandboxSignKeyRequest::new)
+                .with(SandboxSignKeyRequest::setMch_id, WechatConfig.getWechatMchId())
+                .build();
+
+        // mch_id
+        WechatPayException we = assertThrows(WechatPayException.class,
+                () -> WechatPayApi.getSandboxnewSignKey(mchRequest));
+        assertEquals("[nonce_str] 不能为空", we.getMessage());
+
+//        SandboxSignKeyRequest mchRequest = BuilderUtils.of(SandboxSignKeyRequest::new)
+//                .with(SandboxSignKeyRequest::setNonce_str, ObjectId.stringId())
+//                .build();
+//
+//        // mch_id
+//        assertThrows(WechatPayException.class,
+//                () -> WechatPayApi.getSandboxnewSignKey(request),
+//                "[mch_id] 不能为空");
+
+
     }
 
     /**
