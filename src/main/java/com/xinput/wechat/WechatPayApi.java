@@ -179,10 +179,9 @@ public class WechatPayApi {
      * @param transactionId 微信订单号
      * @return
      */
-    public static OrderQueryResponse queryOrder(String transactionId, String outTradeNo) throws WechatPayException {
+    public static OrderQueryResponse queryOrderByTransactionId(String transactionId) throws WechatPayException {
         OrderQueryRequest orderQueryRequest = BuilderUtils.of(OrderQueryRequest::new)
                 .with(OrderQueryRequest::setTransaction_id, transactionId)
-                .with(OrderQueryRequest::setOut_trade_no, outTradeNo)
                 .build();
 
         return queryOrder(orderQueryRequest);
@@ -194,7 +193,7 @@ public class WechatPayApi {
      * @param outTradeNo 商户订单号
      * @return
      */
-    public static OrderQueryResponse queryOrder(String outTradeNo) throws WechatPayException {
+    public static OrderQueryResponse queryOrderByOutTradeNo(String outTradeNo) throws WechatPayException {
         OrderQueryRequest orderQueryRequest = BuilderUtils.of(OrderQueryRequest::new)
                 .with(OrderQueryRequest::setOut_trade_no, outTradeNo)
                 .build();
@@ -250,6 +249,25 @@ public class WechatPayApi {
     }
 
     /**
+     * 申请退款 - 根据微信订单号
+     *
+     * @param transactionId 商户订单号
+     * @param outRefundNo   商户退款单号 自定义
+     * @param totalFee      订单金额
+     * @param refundFee     退款金额
+     */
+    public static RefundResponse refundByTransactionId(String transactionId, String outRefundNo, Integer totalFee, Integer refundFee) throws WechatPayException {
+        RefundRequest request = BuilderUtils.of(RefundRequest::new)
+                .with(RefundRequest::setTransaction_id, transactionId)
+                .with(RefundRequest::setOut_refund_no, outRefundNo)
+                .with(RefundRequest::setTotal_fee, totalFee)
+                .with(RefundRequest::setRefund_fee, refundFee)
+                .build();
+
+        return refund(request);
+    }
+
+    /**
      * 申请退款
      *
      * @param outTradeNo  商户订单号
@@ -257,7 +275,7 @@ public class WechatPayApi {
      * @param totalFee    订单金额
      * @param refundFee   退款金额
      */
-    public static RefundResponse refund(String outTradeNo, String outRefundNo, Integer totalFee, Integer refundFee) throws WechatPayException {
+    public static RefundResponse refundByOutTradeNo(String outTradeNo, String outRefundNo, Integer totalFee, Integer refundFee) throws WechatPayException {
         RefundRequest request = BuilderUtils.of(RefundRequest::new)
                 .with(RefundRequest::setOut_trade_no, outTradeNo)
                 .with(RefundRequest::setOut_refund_no, outRefundNo)
@@ -289,11 +307,11 @@ public class WechatPayApi {
     }
 
     /**
-     * 查询退款
+     * 查询退款 - 根据微信订单号
      *
      * @param transactionId 微信订单号
      */
-    public static RefundQueryResponse refundQueryByTransaction(String transactionId) throws WechatPayException {
+    public static RefundQueryResponse refundQueryByTransactionId(String transactionId) throws WechatPayException {
         RefundQueryRequest request = BuilderUtils.of(RefundQueryRequest::new)
                 .with(RefundQueryRequest::setTransaction_id, transactionId)
                 .build();
@@ -302,7 +320,7 @@ public class WechatPayApi {
     }
 
     /**
-     * 查询退款
+     * 查询退款 - 根据商户订单号
      *
      * @param outTradeNo 商户订单号
      */
@@ -313,7 +331,6 @@ public class WechatPayApi {
 
         return refundQuery(request);
     }
-
 
     /**
      * 查询退款
@@ -329,11 +346,11 @@ public class WechatPayApi {
     }
 
     /**
-     * 查询退款
+     * 查询退款 - 根据微信退款单号
      *
      * @param refundId 微信退款单号
      */
-    public static RefundQueryResponse refundQueryByRefund(String refundId) throws WechatPayException {
+    public static RefundQueryResponse refundQueryByRefundId(String refundId) throws WechatPayException {
         RefundQueryRequest request = BuilderUtils.of(RefundQueryRequest::new)
                 .with(RefundQueryRequest::setRefund_id, refundId)
                 .build();
@@ -349,6 +366,7 @@ public class WechatPayApi {
             refundQueryRequest = new RefundQueryRequest();
         }
         String result = WechatHttpUtils.withoutCertQequest(getDomain() + PayUrlEnum.REFUND_QUERY.getUrl(), refundQueryRequest);
+        logger.info("result:{}", result);
         Map<String, Object> params = WechatXmlUtils.toMap(result);
         return RefundQueryResponse.createRefundQueryResponse(params, SignTypeEnum.getSignType(refundQueryRequest.getSign_type()));
     }

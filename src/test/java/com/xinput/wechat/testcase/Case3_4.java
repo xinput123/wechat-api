@@ -77,7 +77,7 @@ public class Case3_4 {
         String id = ObjectId.stringId();
         System.out.println("id = " + id);
         try {
-            RefundResponse response = WechatPayApi.refund(outTradeNo, id, 502, 502);
+            RefundResponse response = WechatPayApi.refundByOutTradeNo(outTradeNo, id, 502, 502);
             logger.info(JsonUtils.toJsonString(response, true));
         } catch (Exception e) {
             e.printStackTrace();

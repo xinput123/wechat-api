@@ -1,6 +1,7 @@
 package com.xinput.wechat.request;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.xinput.bleach.util.StringUtils;
 import com.xinput.wechat.exception.WechatPayException;
 
 import javax.validation.constraints.NotEmpty;
@@ -33,7 +34,6 @@ public class RefundRequest extends BaseWeChatPayRequest {
      * 描述: 商户系统内部订单号，要求32个字符内，只能是数字、大小写字母_-|*@ ，且在同一个商户号下唯一。
      * https://pay.weixin.qq.com/wiki/doc/api/wxa/wxa_api.php?chapter=4_2
      */
-//    @NotEmpty(message = "[out_trade_no] 不能为空")
     @XStreamAlias("out_trade_no")
     private String out_trade_no;
 
@@ -190,16 +190,20 @@ public class RefundRequest extends BaseWeChatPayRequest {
     public void checkConstraints() throws WechatPayException {
         checkField();
 
-        if (this.total_fee <= 0) {
-            throw new WechatPayException("[total_fee] 的值必须大于0");
+        if (StringUtils.isAllEmpty(this.transaction_id, this.out_trade_no)) {
+            throw new WechatPayException("申请退款时，[transaction_id] 和 [out_trade_no] 不能同时为空");
         }
 
-        if (this.refund_fee <= 0) {
-            throw new WechatPayException("[refund_fee] 的值必须大于0");
-        }
-
-        if (this.total_fee < this.refund_fee) {
-            throw new WechatPayException(String.format("退款金额不能大于账单总金额,请检查. total_fee:[%s], refund_fee:[%s]", this.total_fee, this.refund_fee));
-        }
+//        if (this.total_fee <= 0) {
+//            throw new WechatPayException("[total_fee] 的值必须大于0");
+//        }
+//
+//        if (this.refund_fee <= 0) {
+//            throw new WechatPayException("[refund_fee] 的值必须大于0");
+//        }
+//
+//        if (this.total_fee < this.refund_fee) {
+//            throw new WechatPayException(String.format("退款金额不能大于账单总金额,请检查. total_fee:[%s], refund_fee:[%s]", this.total_fee, this.refund_fee));
+//        }
     }
 }
