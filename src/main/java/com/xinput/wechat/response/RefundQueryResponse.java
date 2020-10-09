@@ -3,6 +3,7 @@ package com.xinput.wechat.response;
 import com.google.common.collect.Lists;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.xinput.bleach.util.BuilderUtils;
+import com.xinput.bleach.util.CastUtils;
 import com.xinput.bleach.util.JsonUtils;
 import com.xinput.bleach.util.StringUtils;
 import com.xinput.bleach.util.bean.BeanMapUtils;
@@ -314,20 +315,21 @@ public class RefundQueryResponse extends BaseWeChatPayResponse {
         // 对于微信支付返回的带有下标的 _0,_1,_2 类型参数进行封装
         List<Refund> queryRefunds = Lists.newArrayListWithCapacity(refundCount);
         for (int i = 0; i < refundCount; i++) {
-            Integer couponRefundCount = Integer.valueOf(String.valueOf(params.get("coupon_refund_count_" + i)));
+            int couponRefundCount = CastUtils.castInt(String.valueOf(params.get("coupon_refund_count_" + i)));
             Refund refundCoupon = BuilderUtils.of(Refund::new)
                     .with(Refund::setIndex, i)
                     .with(Refund::setRefund_id, String.valueOf(params.get("refund_id_" + i)))
                     .with(Refund::setRefund_status, String.valueOf(params.get("refund_status_" + i)))
-                    .with(Refund::setCoupon_refund_fee, Integer.valueOf(String.valueOf(params.get("coupon_refund_fee_" + i))))
                     .with(Refund::setRefund_fee, Integer.valueOf(String.valueOf(params.get("refund_fee_" + i))))
-                    .with(Refund::setSettlement_refund_fee, Integer.valueOf(String.valueOf(params.get("settlement_refund_fee_" + i))))
                     .with(Refund::setRefund_recv_accout, String.valueOf(params.get("refund_recv_accout_" + i)))
                     .with(Refund::setRefund_channel, String.valueOf(params.get("refund_channel_" + i)))
                     .with(Refund::setOut_refund_no, String.valueOf(params.get("out_refund_no_" + i)))
-                    .with(Refund::setCoupon_refund_count, couponRefundCount)
                     .build();
             if (couponRefundCount > 0) {
+                refundCoupon.setCoupon_refund_count(couponRefundCount);
+                refundCoupon.setCoupon_refund_fee(Integer.valueOf(String.valueOf(params.get("coupon_refund_fee_" + i))));
+                refundCoupon.setSettlement_refund_fee(Integer.valueOf(String.valueOf(params.get("settlement_refund_fee_" + i))));
+
                 List<RefundDetail> details = Lists.newArrayListWithCapacity(couponRefundCount);
                 for (int k = 0; k < couponRefundCount; k++) {
                     String suffixKey = i + "_" + k;

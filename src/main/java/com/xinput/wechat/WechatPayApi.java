@@ -366,7 +366,9 @@ public class WechatPayApi {
             refundQueryRequest = new RefundQueryRequest();
         }
         String result = WechatHttpUtils.withoutCertQequest(getDomain() + PayUrlEnum.REFUND_QUERY.getUrl(), refundQueryRequest);
+
         logger.info("result:{}", result);
+
         Map<String, Object> params = WechatXmlUtils.toMap(result);
         return RefundQueryResponse.createRefundQueryResponse(params, SignTypeEnum.getSignType(refundQueryRequest.getSign_type()));
     }
