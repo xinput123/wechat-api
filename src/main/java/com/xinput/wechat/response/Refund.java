@@ -2,7 +2,7 @@ package com.xinput.wechat.response;
 
 import java.util.List;
 
-public class QueryRefund {
+public class Refund {
 
     /**
      * 仅用于下标进行排序
@@ -99,7 +99,7 @@ public class QueryRefund {
      */
     private Integer coupon_refund_count;
 
-    private List<QueryRefundDetail> queryRefundDetails;
+    private List<RefundDetail> queryRefundDetails;
 
     public Integer getIndex() {
         return index;
@@ -173,11 +173,11 @@ public class QueryRefund {
         this.coupon_refund_count = coupon_refund_count;
     }
 
-    public List<QueryRefundDetail> getQueryRefundDetails() {
+    public List<RefundDetail> getQueryRefundDetails() {
         return queryRefundDetails;
     }
 
-    public void setQueryRefundDetails(List<QueryRefundDetail> queryRefundDetails) {
+    public void setQueryRefundDetails(List<RefundDetail> queryRefundDetails) {
         this.queryRefundDetails = queryRefundDetails;
     }
 

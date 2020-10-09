@@ -6,7 +6,7 @@ package com.xinput.wechat.response;
  * @author <a href="mailto:xinput.xx@gmail.com">xinput</a>
  * @date 2020-09-24 15:34
  */
-public class QueryRefundDetail {
+public class RefundDetail {
 
     private Integer detailIndex;
 

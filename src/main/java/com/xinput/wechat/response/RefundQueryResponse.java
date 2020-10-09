@@ -165,7 +165,7 @@ public class RefundQueryResponse extends BaseWeChatPayResponse {
     @XStreamAlias("rate")
     private BigDecimal rate;
 
-    private List<QueryRefund> queryRefunds;
+    private List<Refund> queryRefunds;
 
     public Integer getTotal_refund_count() {
         return total_refund_count;
@@ -280,11 +280,11 @@ public class RefundQueryResponse extends BaseWeChatPayResponse {
         this.rate = rate;
     }
 
-    public List<QueryRefund> getQueryRefunds() {
+    public List<Refund> getQueryRefunds() {
         return queryRefunds;
     }
 
-    public void setQueryRefunds(List<QueryRefund> queryRefunds) {
+    public void setQueryRefunds(List<Refund> queryRefunds) {
         this.queryRefunds = queryRefunds;
     }
 
@@ -312,30 +312,30 @@ public class RefundQueryResponse extends BaseWeChatPayResponse {
         }
 
         // 对于微信支付返回的带有下标的 _0,_1,_2 类型参数进行封装
-        List<QueryRefund> queryRefunds = Lists.newArrayListWithCapacity(refundCount);
+        List<Refund> queryRefunds = Lists.newArrayListWithCapacity(refundCount);
         for (int i = 0; i < refundCount; i++) {
             Integer couponRefundCount = Integer.valueOf(String.valueOf(params.get("coupon_refund_count_" + i)));
-            QueryRefund refundCoupon = BuilderUtils.of(QueryRefund::new)
-                    .with(QueryRefund::setIndex, i)
-                    .with(QueryRefund::setRefund_id, String.valueOf(params.get("refund_id_" + i)))
-                    .with(QueryRefund::setRefund_status, String.valueOf(params.get("refund_status_" + i)))
-                    .with(QueryRefund::setCoupon_refund_fee, Integer.valueOf(String.valueOf(params.get("coupon_refund_fee_" + i))))
-                    .with(QueryRefund::setRefund_fee, Integer.valueOf(String.valueOf(params.get("refund_fee_" + i))))
-                    .with(QueryRefund::setSettlement_refund_fee, Integer.valueOf(String.valueOf(params.get("settlement_refund_fee_" + i))))
-                    .with(QueryRefund::setRefund_recv_accout, String.valueOf(params.get("refund_recv_accout_" + i)))
-                    .with(QueryRefund::setRefund_channel, String.valueOf(params.get("refund_channel_" + i)))
-                    .with(QueryRefund::setOut_refund_no, String.valueOf(params.get("out_refund_no_" + i)))
-                    .with(QueryRefund::setCoupon_refund_count, couponRefundCount)
+            Refund refundCoupon = BuilderUtils.of(Refund::new)
+                    .with(Refund::setIndex, i)
+                    .with(Refund::setRefund_id, String.valueOf(params.get("refund_id_" + i)))
+                    .with(Refund::setRefund_status, String.valueOf(params.get("refund_status_" + i)))
+                    .with(Refund::setCoupon_refund_fee, Integer.valueOf(String.valueOf(params.get("coupon_refund_fee_" + i))))
+                    .with(Refund::setRefund_fee, Integer.valueOf(String.valueOf(params.get("refund_fee_" + i))))
+                    .with(Refund::setSettlement_refund_fee, Integer.valueOf(String.valueOf(params.get("settlement_refund_fee_" + i))))
+                    .with(Refund::setRefund_recv_accout, String.valueOf(params.get("refund_recv_accout_" + i)))
+                    .with(Refund::setRefund_channel, String.valueOf(params.get("refund_channel_" + i)))
+                    .with(Refund::setOut_refund_no, String.valueOf(params.get("out_refund_no_" + i)))
+                    .with(Refund::setCoupon_refund_count, couponRefundCount)
                     .build();
             if (couponRefundCount > 0) {
-                List<QueryRefundDetail> details = Lists.newArrayListWithCapacity(couponRefundCount);
+                List<RefundDetail> details = Lists.newArrayListWithCapacity(couponRefundCount);
                 for (int k = 0; k < couponRefundCount; k++) {
                     String suffixKey = i + "_" + k;
-                    QueryRefundDetail detail = BuilderUtils.of(QueryRefundDetail::new)
-                            .with(QueryRefundDetail::setDetailIndex, k)
-                            .with(QueryRefundDetail::setCoupon_refund_id, String.valueOf(params.get("refund_channel_" + suffixKey)))
-                            .with(QueryRefundDetail::setCoupon_type, String.valueOf(params.get("coupon_type_" + suffixKey)))
-                            .with(QueryRefundDetail::setCoupon_refund_fee, Integer.valueOf(String.valueOf(params.get("coupon_refund_fee_" + suffixKey))))
+                    RefundDetail detail = BuilderUtils.of(RefundDetail::new)
+                            .with(RefundDetail::setDetailIndex, k)
+                            .with(RefundDetail::setCoupon_refund_id, String.valueOf(params.get("refund_channel_" + suffixKey)))
+                            .with(RefundDetail::setCoupon_type, String.valueOf(params.get("coupon_type_" + suffixKey)))
+                            .with(RefundDetail::setCoupon_refund_fee, Integer.valueOf(String.valueOf(params.get("coupon_refund_fee_" + suffixKey))))
                             .build();
                     details.add(detail);
                 }
