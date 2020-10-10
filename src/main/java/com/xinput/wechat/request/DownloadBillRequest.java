@@ -1,6 +1,8 @@
 package com.xinput.wechat.request;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.xinput.bleach.util.StringUtils;
+import com.xinput.wechat.enums.BillTypeEnum;
 import com.xinput.wechat.exception.WechatPayException;
 
 import javax.validation.constraints.NotEmpty;
@@ -43,7 +45,7 @@ public class DownloadBillRequest extends BaseWeChatPayRequest {
      * 描述: 非必传参数，固定值：GZIP，返回格式为.gzip的压缩包账单。不传则默认为数据流形式
      */
     @XStreamAlias("tar_type")
-    private String tar_type = "GZIP";
+    private String tar_type;
 
     public String getBill_date() {
         return bill_date;
@@ -71,6 +73,13 @@ public class DownloadBillRequest extends BaseWeChatPayRequest {
 
     @Override
     public void checkConstraints() throws WechatPayException {
+        checkField();
 
+        if (StringUtils.isNotNullOrEmpty(this.bill_type)) {
+            BillTypeEnum billTypeEnum = BillTypeEnum.get(bill_type);
+            if (billTypeEnum == null) {
+                throw new WechatPayException("[bill_type] 的值只能是[ALL、SUCCESS、REFUND、RECHARGE_REFUND]");
+            }
+        }
     }
 }

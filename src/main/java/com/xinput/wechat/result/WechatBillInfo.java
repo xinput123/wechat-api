@@ -2,6 +2,8 @@ package com.xinput.wechat.result;
 
 import com.univocity.parsers.annotations.Parsed;
 
+import java.math.BigDecimal;
+
 /**
  * 交易账单 - 当日所有订单
  *
@@ -86,13 +88,13 @@ public class WechatBillInfo {
      * 应结订单金额
      */
     @Parsed(index = 12)
-    private String totalFee;
+    private BigDecimal totalFee;
 
     /**
      * 代金券金额
      */
     @Parsed(index = 13)
-    private String couponFee;
+    private BigDecimal couponFee;
 
     /**
      * 微信退款单号
@@ -110,13 +112,13 @@ public class WechatBillInfo {
      * 退款金额
      */
     @Parsed(index = 16)
-    private String settlementRefundFee;
+    private BigDecimal settlementRefundFee;
 
     /**
      * 充值券退款金额
      */
     @Parsed(index = 17)
-    private String couponRefundFee;
+    private BigDecimal couponRefundFee;
 
     /**
      * 退款类型
@@ -146,7 +148,7 @@ public class WechatBillInfo {
      * 手续费
      */
     @Parsed(index = 22)
-    private String poundage;
+    private BigDecimal poundage;
 
     /**
      * 费率
@@ -158,30 +160,19 @@ public class WechatBillInfo {
      * 订单金额
      */
     @Parsed(index = 24)
-    private String totalAmount;
+    private BigDecimal totalAmount;
 
     /**
      * 申请退款金额
      */
     @Parsed(index = 25)
-    private String appliedRefundAmount;
+    private BigDecimal appliedRefundAmount;
 
     /**
      * 费率备注
      */
     @Parsed(index = 26)
     private String feeRemark;
-
-//    /**
-//     * 退款申请时间
-//     */
-//    private String refundTime;
-//
-//    /**
-//     * 退款成功时间
-//     */
-//    private String refundSuccessTime;
-
 
     public String getTradeTime() {
         return tradeTime;
@@ -279,19 +270,19 @@ public class WechatBillInfo {
         this.feeType = feeType;
     }
 
-    public String getTotalFee() {
+    public BigDecimal getTotalFee() {
         return totalFee;
     }
 
-    public void setTotalFee(String totalFee) {
+    public void setTotalFee(BigDecimal totalFee) {
         this.totalFee = totalFee;
     }
 
-    public String getCouponFee() {
+    public BigDecimal getCouponFee() {
         return couponFee;
     }
 
-    public void setCouponFee(String couponFee) {
+    public void setCouponFee(BigDecimal couponFee) {
         this.couponFee = couponFee;
     }
 
@@ -311,19 +302,19 @@ public class WechatBillInfo {
         this.outRefundNo = outRefundNo;
     }
 
-    public String getSettlementRefundFee() {
+    public BigDecimal getSettlementRefundFee() {
         return settlementRefundFee;
     }
 
-    public void setSettlementRefundFee(String settlementRefundFee) {
+    public void setSettlementRefundFee(BigDecimal settlementRefundFee) {
         this.settlementRefundFee = settlementRefundFee;
     }
 
-    public String getCouponRefundFee() {
+    public BigDecimal getCouponRefundFee() {
         return couponRefundFee;
     }
 
-    public void setCouponRefundFee(String couponRefundFee) {
+    public void setCouponRefundFee(BigDecimal couponRefundFee) {
         this.couponRefundFee = couponRefundFee;
     }
 
@@ -359,11 +350,11 @@ public class WechatBillInfo {
         this.attach = attach;
     }
 
-    public String getPoundage() {
+    public BigDecimal getPoundage() {
         return poundage;
     }
 
-    public void setPoundage(String poundage) {
+    public void setPoundage(BigDecimal poundage) {
         this.poundage = poundage;
     }
 
@@ -375,19 +366,19 @@ public class WechatBillInfo {
         this.poundageRate = poundageRate;
     }
 
-    public String getTotalAmount() {
+    public BigDecimal getTotalAmount() {
         return totalAmount;
     }
 
-    public void setTotalAmount(String totalAmount) {
+    public void setTotalAmount(BigDecimal totalAmount) {
         this.totalAmount = totalAmount;
     }
 
-    public String getAppliedRefundAmount() {
+    public BigDecimal getAppliedRefundAmount() {
         return appliedRefundAmount;
     }
 
-    public void setAppliedRefundAmount(String appliedRefundAmount) {
+    public void setAppliedRefundAmount(BigDecimal appliedRefundAmount) {
         this.appliedRefundAmount = appliedRefundAmount;
     }
 

@@ -1,5 +1,6 @@
 package com.xinput.wechat.result;
 
+import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.univocity.parsers.annotations.Parsed;
 
 import java.math.BigDecimal;
@@ -11,7 +12,8 @@ import java.util.List;
  * @author <a href="mailto:xinput.xx@gmail.com">xinput</a>
  * @date 2020-09-25 14:28
  */
-public class WechatPayBillResult {
+@XStreamAlias("xml")
+public class WechatPayBillResult extends BaseResult {
 
     /**
      * 总交易单数

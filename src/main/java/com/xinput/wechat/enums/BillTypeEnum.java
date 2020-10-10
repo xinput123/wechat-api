@@ -1,5 +1,7 @@
 package com.xinput.wechat.enums;
 
+import com.xinput.bleach.util.StringUtils;
+
 /**
  * 账单类型
  *
@@ -25,5 +27,17 @@ public enum BillTypeEnum {
 
     public String getBillType() {
         return billType;
+    }
+
+    public static BillTypeEnum get(String billType) {
+        if (StringUtils.isNotNullOrEmpty(billType)) {
+            for (BillTypeEnum billTypeEnum : BillTypeEnum.values()) {
+                if (StringUtils.equalsIgnoreCase(billTypeEnum.billType, billType)) {
+                    return billTypeEnum;
+                }
+            }
+        }
+
+        return null;
     }
 }

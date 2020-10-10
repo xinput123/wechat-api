@@ -11,6 +11,7 @@ import com.xinput.bleach.util.date.LocalDateUtils;
 import com.xinput.wechat.config.WechatConfig;
 import com.xinput.wechat.consts.WechatConsts;
 import com.xinput.wechat.enums.AccountTypeEnum;
+import com.xinput.wechat.enums.BillTypeEnum;
 import com.xinput.wechat.enums.PayUrlEnum;
 import com.xinput.wechat.enums.SignTypeEnum;
 import com.xinput.wechat.enums.TradeTypeEnum;
@@ -376,11 +377,52 @@ public class WechatPayApi {
     /**
      * 下载交易账单
      */
+    public static String downloadBillContent(String billDate) throws WechatPayException {
+        return downloadBillContent(billDate, BillTypeEnum.ALL.getBillType());
+    }
+
+    /**
+     * 下载交易账单
+     */
+    public static String downloadBillContent(String billDate, String billType) throws WechatPayException {
+        DownloadBillRequest downloadBillRequest = new DownloadBillRequest();
+        downloadBillRequest.setBill_date(billDate);
+        downloadBillRequest.setBill_type(billType);
+
+        return downloadBillContent(downloadBillRequest);
+    }
+
+    /**
+     * 下载交易账单
+     */
     public static String downloadBillContent(DownloadBillRequest downloadBillRequest) throws WechatPayException {
         if (downloadBillRequest == null) {
             downloadBillRequest = new DownloadBillRequest();
         }
+
+        if (StringUtils.isNullOrEmpty(downloadBillRequest.getBill_type())) {
+            downloadBillRequest.setBill_type(BillTypeEnum.ALL.getBillType());
+        }
+
         return WechatHttpUtils.withoutCertQequest(getDomain() + PayUrlEnum.DOWNLOAD_BILL.getUrl(), downloadBillRequest).replaceAll("`", "");
+    }
+
+    /**
+     * 下载交易账单
+     */
+    public static WechatPayBillResult downloadBill(String billDate) throws WechatPayException {
+        return downloadBill(billDate, BillTypeEnum.ALL.getBillType());
+    }
+
+    /**
+     * 下载交易账单
+     */
+    public static WechatPayBillResult downloadBill(String billDate, String billType) throws WechatPayException {
+        DownloadBillRequest downloadBillRequest = new DownloadBillRequest();
+        downloadBillRequest.setBill_date(billDate);
+        downloadBillRequest.setBill_type(billType);
+
+        return downloadBill(downloadBillRequest);
     }
 
     /**
@@ -391,8 +433,11 @@ public class WechatPayApi {
             downloadBillRequest = new DownloadBillRequest();
         }
 
-        String result = WechatHttpUtils.withoutCertQequest(getDomain() + PayUrlEnum.DOWNLOAD_BILL.getUrl(), downloadBillRequest).replaceAll("`", "");
+        String result = downloadBillContent(downloadBillRequest);
         System.out.println(result);
+        if (result.startsWith(WechatConsts.XML)) {
+            return XmlUtils.toBean(result, WechatPayBillResult.class);
+        }
 
         // 微信总共返回的数据条数，包括表头
         List<BillCount> billCounts = CsvUtils.readCsv(result, BillCount.class);
@@ -400,7 +445,7 @@ public class WechatPayApi {
         List<WechatPayBillResult> wechatPayBillResults = CsvUtils.readCsv(result, billCount + 2, WechatPayBillResult.class);
         WechatPayBillResult wechatPayBillResult = wechatPayBillResults.get(0);
 
-        List<WechatBillInfo> wechatBillInfos = CsvUtils.readCsv(result, 1, billCount - 3, WechatBillInfo.class);
+        List<WechatBillInfo> wechatBillInfos = CsvUtils.readCsv(result, 1, billCount, WechatBillInfo.class);
         wechatPayBillResult.setWechatBillInfos(wechatBillInfos);
         return wechatPayBillResult;
 
