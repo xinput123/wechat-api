@@ -1,6 +1,8 @@
 package com.xinput.wechatpay;
 
+import com.google.common.collect.Lists;
 import com.xinput.bleach.util.BuilderUtils;
+import com.xinput.bleach.util.CastUtils;
 import com.xinput.bleach.util.JsonUtils;
 import com.xinput.bleach.util.Logs;
 import com.xinput.bleach.util.ObjectId;
@@ -9,7 +11,6 @@ import com.xinput.bleach.util.XmlUtils;
 import com.xinput.bleach.util.bean.BeanMapUtils;
 import com.xinput.wechatpay.config.WechatConfig;
 import com.xinput.wechatpay.consts.WechatConsts;
-import com.xinput.wechatpay.dto.RefundNotifyDto;
 import com.xinput.wechatpay.enums.AccountTypeEnum;
 import com.xinput.wechatpay.enums.BillTypeEnum;
 import com.xinput.wechatpay.enums.PayUrlEnum;
@@ -35,7 +36,10 @@ import com.xinput.wechatpay.response.RefundResponse;
 import com.xinput.wechatpay.response.SandboxSignKeyResponse;
 import com.xinput.wechatpay.response.UnifiedOrderResponse;
 import com.xinput.wechatpay.result.BillCount;
+import com.xinput.wechatpay.result.RefundNotifyDto;
 import com.xinput.wechatpay.result.RefundNotifyResult;
+import com.xinput.wechatpay.result.UnifiedCoupon;
+import com.xinput.wechatpay.result.UnifiedNotifyResult;
 import com.xinput.wechatpay.result.WechatBillInfo;
 import com.xinput.wechatpay.result.WechatFundFlowDetail;
 import com.xinput.wechatpay.result.WechatFundFlowResult;
@@ -573,6 +577,34 @@ public class WechatPayApi {
         return QueryCommentResponse.fromXml(result);
     }
 
+    public static UnifiedNotifyResult parseUnifiedNotify(String content) throws WechatPayException {
+        Map<String, Object> params = WechatXmlUtils.toMap(content);
+        UnifiedNotifyResult result = BeanMapUtils.toBean(params, UnifiedNotifyResult.class);
+
+        Integer couponCount = result.getCoupon_count();
+        if (couponCount == null || couponCount <= 0) {
+            return result;
+        }
+
+        List<UnifiedCoupon> unifiedCoupons = Lists.newArrayListWithCapacity(couponCount);
+        for (Integer i = 0; i < couponCount; i++) {
+            UnifiedCoupon unifiedCoupon = new UnifiedCoupon();
+            unifiedCoupon.setIndex(i);
+            unifiedCoupon.setCoupon_id(String.valueOf(params.get("coupon_id_" + i)));
+            unifiedCoupon.setCoupon_type(String.valueOf(params.get("coupon_type_" + i)));
+            unifiedCoupon.setCoupon_fee(CastUtils.castInt(params.get("coupon_fee_" + i)));
+
+            unifiedCoupons.add(unifiedCoupon);
+        }
+
+        result.setUnifiedCoupons(unifiedCoupons);
+
+        return result;
+    }
+
+    /**
+     * 解析退款通知
+     */
     public static RefundNotifyResult decodeRefund(String wechatRefundNotify) throws WechatPayException {
         RefundNotifyDto refundNotifyDto = XmlUtils.toBean(wechatRefundNotify, RefundNotifyDto.class);
         if (!StringUtils.equalsIgnoreCase("SUCCESS", refundNotifyDto.getReturn_code())) {

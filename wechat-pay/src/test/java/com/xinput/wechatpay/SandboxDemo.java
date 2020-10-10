@@ -54,16 +54,6 @@ public class SandboxDemo {
                 () -> WechatPayApi.getSandboxnewSignKey(mchRequest));
         assertEquals("[nonce_str] 不能为空", we.getMessage());
 
-//        SandboxSignKeyRequest mchRequest = BuilderUtils.of(SandboxSignKeyRequest::new)
-//                .with(SandboxSignKeyRequest::setNonce_str, ObjectId.stringId())
-//                .build();
-//
-//        // mch_id
-//        assertThrows(WechatPayException.class,
-//                () -> WechatPayApi.getSandboxnewSignKey(request),
-//                "[mch_id] 不能为空");
-
-
     }
 
     /**
