@@ -1,1 +1,0 @@
-package com.xinput.wechat.dto;/** * 退款通知 */public class RefundDto {}

@@ -1,0 +1,1 @@
+package com.xinput.wechatpay.dto;/** * 退款通知 */public class RefundDto {}
