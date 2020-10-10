@@ -9,6 +9,7 @@ import com.xinput.bleach.util.XmlUtils;
 import com.xinput.bleach.util.bean.BeanMapUtils;
 import com.xinput.wechatpay.config.WechatConfig;
 import com.xinput.wechatpay.consts.WechatConsts;
+import com.xinput.wechatpay.dto.RefundNotifyDto;
 import com.xinput.wechatpay.enums.AccountTypeEnum;
 import com.xinput.wechatpay.enums.BillTypeEnum;
 import com.xinput.wechatpay.enums.PayUrlEnum;
@@ -34,10 +35,12 @@ import com.xinput.wechatpay.response.RefundResponse;
 import com.xinput.wechatpay.response.SandboxSignKeyResponse;
 import com.xinput.wechatpay.response.UnifiedOrderResponse;
 import com.xinput.wechatpay.result.BillCount;
+import com.xinput.wechatpay.result.RefundNotifyResult;
 import com.xinput.wechatpay.result.WechatBillInfo;
 import com.xinput.wechatpay.result.WechatFundFlowDetail;
 import com.xinput.wechatpay.result.WechatFundFlowResult;
 import com.xinput.wechatpay.result.WechatPayBillResult;
+import com.xinput.wechatpay.util.AESUtils;
 import com.xinput.wechatpay.util.CsvUtils;
 import com.xinput.wechatpay.util.ValidateUtils;
 import com.xinput.wechatpay.util.WechatHttpUtils;
@@ -570,4 +573,22 @@ public class WechatPayApi {
         return QueryCommentResponse.fromXml(result);
     }
 
+    public static RefundNotifyResult decodeRefund(String wechatRefundNotify) throws WechatPayException {
+        RefundNotifyDto refundNotifyDto = XmlUtils.toBean(wechatRefundNotify, RefundNotifyDto.class);
+        if (!StringUtils.equalsIgnoreCase("SUCCESS", refundNotifyDto.getReturn_code())) {
+            throw new WechatPayException(String.format("微信退款返回通知值为:[{}].", JsonUtils.toJsonString(refundNotifyDto)));
+        }
+
+        if (!StringUtils.equalsIgnoreCase(WechatConfig.getWechatAppid(), refundNotifyDto.getAppid())) {
+            throw new WechatPayException(String.format("配置的[appid]与退款通知返回的[appid]不同,退款通知返回[appid]为[%s]", refundNotifyDto.getAppid()));
+        }
+
+        if (!StringUtils.equalsIgnoreCase(WechatConfig.getWechatMchId(), refundNotifyDto.getMch_id())) {
+            throw new WechatPayException(String.format("配置的[mch_id]与退款通知返回的[mch_id]不同,退款通知返回[mch_id]为[%s]", refundNotifyDto.getMch_id()));
+        }
+
+        String decryptResult = AESUtils.decryptData(refundNotifyDto.getReq_info(), WechatConfig.getWechatApiKey());
+        RefundNotifyResult notifyResult = XmlUtils.toBean(decryptResult, RefundNotifyResult.class);
+        return notifyResult;
+    }
 }
