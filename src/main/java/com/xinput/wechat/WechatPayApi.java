@@ -101,7 +101,6 @@ public class WechatPayApi {
         ValidateUtils.validate(sandboxSignKeyRequest);
 
         String result = WechatHttpUtils.execute(GET_SIGNKEY, XmlUtils.toXml(sandboxSignKeyRequest), false);
-        System.out.println(result);
         return XmlUtils.toBean(result, SandboxSignKeyResponse.class);
     }
 
