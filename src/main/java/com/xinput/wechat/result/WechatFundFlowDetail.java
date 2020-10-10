@@ -10,7 +10,7 @@ import java.math.BigDecimal;
  *
  * @author cwivan
  */
-public class WechatFundFlowBaseResult {
+public class WechatFundFlowDetail {
 
     /**
      * 记账时间

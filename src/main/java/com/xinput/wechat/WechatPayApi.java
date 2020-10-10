@@ -7,7 +7,6 @@ import com.xinput.bleach.util.ObjectId;
 import com.xinput.bleach.util.StringUtils;
 import com.xinput.bleach.util.XmlUtils;
 import com.xinput.bleach.util.bean.BeanMapUtils;
-import com.xinput.bleach.util.date.LocalDateUtils;
 import com.xinput.wechat.config.WechatConfig;
 import com.xinput.wechat.consts.WechatConsts;
 import com.xinput.wechat.enums.AccountTypeEnum;
@@ -36,7 +35,7 @@ import com.xinput.wechat.response.SandboxSignKeyResponse;
 import com.xinput.wechat.response.UnifiedOrderResponse;
 import com.xinput.wechat.result.BillCount;
 import com.xinput.wechat.result.WechatBillInfo;
-import com.xinput.wechat.result.WechatFundFlowBaseResult;
+import com.xinput.wechat.result.WechatFundFlowDetail;
 import com.xinput.wechat.result.WechatFundFlowResult;
 import com.xinput.wechat.result.WechatPayBillResult;
 import com.xinput.wechat.util.CsvUtils;
@@ -47,8 +46,6 @@ import com.xinput.wechat.util.WechatXmlUtils;
 import org.slf4j.Logger;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -434,7 +431,7 @@ public class WechatPayApi {
         }
 
         String result = downloadBillContent(downloadBillRequest);
-        System.out.println(result);
+
         if (result.startsWith(WechatConsts.XML)) {
             return XmlUtils.toBean(result, WechatPayBillResult.class);
         }
@@ -454,10 +451,26 @@ public class WechatPayApi {
     /**
      * 下载资金账单
      */
-    public static WechatFundFlowResult downloadFundflow(LocalDate billDate, AccountTypeEnum accountTypeEnum) throws WechatPayException {
-        return downloadFundflow(
-                LocalDateUtils.format(billDate, DateTimeFormatter.ofPattern("yyyyMMdd")),
-                accountTypeEnum);
+    public static String downloadFundflowContent(String billDate, AccountTypeEnum accountTypeEnum) throws WechatPayException {
+        DownloadFundflowRequest request = BuilderUtils.of(DownloadFundflowRequest::new)
+                .with(DownloadFundflowRequest::setBill_date, billDate)
+                .with(DownloadFundflowRequest::setAccount_type, accountTypeEnum.getAccountType())
+                .build();
+
+        return downloadFundflowContent(request);
+    }
+
+    /**
+     * 下载资金账单
+     */
+    public static String downloadFundflowContent(DownloadFundflowRequest request) throws WechatPayException {
+        if (request == null) {
+            request = new DownloadFundflowRequest();
+        }
+
+        return WechatHttpUtils.withCertPost(
+                getDomain() + PayUrlEnum.DOWNLOAD_FUND_FLOW.getUrl(), request)
+                .replaceAll("`", StringUtils.EMPTY);
     }
 
     /**
@@ -476,14 +489,8 @@ public class WechatPayApi {
      * 下载资金账单
      */
     public static WechatFundFlowResult downloadFundflow(DownloadFundflowRequest request) throws WechatPayException {
-        if (request == null) {
-            request = new DownloadFundflowRequest();
-        }
+        String result = downloadFundflowContent(request);
 
-        String result = WechatHttpUtils.withCertPost(
-                getDomain() + PayUrlEnum.DOWNLOAD_FUND_FLOW.getUrl(), request)
-                .replaceAll("`", StringUtils.EMPTY);
-        logger.info(result);
         if (result.startsWith(WechatConsts.XML)) {
             return XmlUtils.toBean(result, WechatFundFlowResult.class);
         }
@@ -499,11 +506,9 @@ public class WechatPayApi {
 
         List<WechatFundFlowResult> wechatFundFlowResults
                 = CsvUtils.readCsv(result, resultSize - 1, WechatFundFlowResult.class);
-        List<WechatFundFlowBaseResult> wechatFundFlowBaseResults
-                = CsvUtils.readCsv(result, 1, resultSize - 2, WechatFundFlowBaseResult.class);
 
         WechatFundFlowResult fundFlowResult = wechatFundFlowResults.get(0);
-        fundFlowResult.setBaseResults(wechatFundFlowBaseResults);
+        fundFlowResult.setDetails(CsvUtils.readCsv(result, 1, fundFlowResult.getTotalRecord(), WechatFundFlowDetail.class));
 
         return fundFlowResult;
     }
